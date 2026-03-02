@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- HTTPS configuration for Vercel -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Neural Command Interface | Visual Brain System</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
@@ -288,6 +290,19 @@
             --secondary: #ff00ff;
         }
     </style>
+
+    <!-- Import Maps Polyfill for ES Modules -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+
+    <!-- ES Module Import Map for Three.js (ESM versions) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -328,7 +343,7 @@
             </div>
 
             <div class="btn-group">
-                <button id="btn-mic">🎙️ ربط الشبكة العصبية (Mic)</button>
+                <button id="btn-mic">🎙️ ربط الشبكة العصبية</button>
                 <button id="btn-record">🔴 تسجيل 30 ثانية</button>
                 <button id="btn-screenshot">📸 التقاط 4K</button>
             </div>
@@ -337,57 +352,6 @@
 
     <canvas id="text-canvas" width="1024" height="1024"></canvas>
     <video id="video"></video>
-
-    <!-- Core Libs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/misc/GPUComputationRenderer.js"></script>
-    <!-- Post Processing -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-    <!-- MediaPipe -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-
-    <!-- Custom Shader Pass: Neural Distortion & Chromatic Aberration -->
-    <script>
-        const NeuralDistortionShader = {
-            uniforms: {
-                "tDiffuse": { value: null },
-                "uTime": { value: 0.0 },
-                "uIntensity": { value: 0.0 },
-                "uDistortion": { value: 0.0 }
-            },
-            vertexShader: `
-                varying vec2 vUv;
-                void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
-            `,
-            fragmentShader: `
-                uniform sampler2D tDiffuse;
-                uniform float uTime;
-                uniform float uIntensity;
-                uniform float uDistortion;
-                varying vec2 vUv;
-                void main() {
-                    vec2 uv = vUv;
-                    // Wave distortion when talking/high energy
-                    uv.y += sin(uv.x * 20.0 + uTime * 5.0) * uDistortion * 0.01;
-                    uv.x += cos(uv.y * 20.0 + uTime * 5.0) * uDistortion * 0.01;
-                    
-                    // Chromatic aberration
-                    float caOffset = 0.002 * uIntensity;
-                    float r = texture2D(tDiffuse, uv + vec2(caOffset, 0.0)).r;
-                    float g = texture2D(tDiffuse, uv).g;
-                    float b = texture2D(tDiffuse, uv - vec2(caOffset, 0.0)).b;
-                    
-                    gl_FragColor = vec4(r, g, b, 1.0);
-                }
-            `
-        };
-    </script>
 
     <!-- GPGPU Compute Shaders -->
     <script type="x-shader/x-fragment" id="compute-pos">
@@ -403,14 +367,14 @@
     <script type="x-shader/x-fragment" id="compute-vel">
         uniform float uTime;
         uniform float uDelta;
-        uniform vec3 uTargetParams; // x: mode (0=sphere, 1=split, 2=text), y: scale, z: energy
+        uniform vec3 uTargetParams;
         uniform sampler2D uTextTex;
-        uniform vec3 uAudioData; // x: bass, y: mid, z: speech intensity
+        uniform vec3 uAudioData;
         uniform vec3 uHand1;
         uniform vec3 uHand2;
         uniform float uHandDist1;
         uniform float uHandDist2;
-        uniform int uIntent; // 0: Calm, 1: Combat, 2: Analysis, 3: Data
+        uniform int uIntent;
 
         vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
         vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -452,21 +416,18 @@
             vec3 force = vec3(0.0);
             float mode = uTargetParams.x;
             float scale = uTargetParams.y;
-            float energy = uTargetParams.z; // Explosion vs attract
+            float energy = uTargetParams.z;
 
-            // Core Shape Dynamics
             if (mode == 0.0 || mode == 1.0) { 
-                // Brain Core / Split Nodes
                 float r = 10.0 * scale;
                 vec3 target1 = vec3(0.0);
                 vec3 target2 = vec3(0.0);
                 
-                if (mode == 1.0) { // Split Universe (2 hands)
+                if (mode == 1.0) {
                     target1 = vec3(-15.0, 0.0, 0.0);
                     target2 = vec3(15.0, 0.0, 0.0);
                 }
                 
-                // Form shell around targets
                 float a = uv.x * 6.28;
                 float b = uv.y * 3.14;
                 vec3 spherePoint = vec3(sin(b)*cos(a), sin(b)*sin(a), cos(b)) * r;
@@ -476,46 +437,34 @@
                 
                 force += (primeTarget - pos) * 2.0;
 
-                // Intent specific forces
-                if (uIntent == 1) { // Combat
-                    force += curlNoise(pos * 0.2 + uTime) * 15.0; // Aggressive
-                } else if (uIntent == 2) { // Analysis
-                    force += vec3(0.0, sin(pos.x * 0.5 + uTime) * 5.0, 0.0); // Scanning layers
-                }
+                if (uIntent == 1) force += curlNoise(pos * 0.2 + uTime) * 15.0;
+                else if (uIntent == 2) force += vec3(0.0, sin(pos.x * 0.5 + uTime) * 5.0, 0.0);
             } else if (mode == 2.0) {
-                // Text Rendering Holographic
                 vec4 tData = texture2D(uTextTex, uv);
-                if (tData.w > 0.5) {
-                    force += (tData.xyz - pos) * 5.0;
-                } else {
-                    force += curlNoise(pos * 0.05 + uTime) * (2.0 + uAudioData.z * 10.0); // Drift
-                    force += -pos * 0.2; // Return to center slightly
+                if (tData.w > 0.5) force += (tData.xyz - pos) * 5.0;
+                else {
+                    force += curlNoise(pos * 0.05 + uTime) * (2.0 + uAudioData.z * 10.0);
+                    force += -pos * 0.2;
                 }
             }
 
-            // High Energy Explosion / Chaos
             if (energy > 1.0) {
                 vec3 expDir = normalize(pos) + curlNoise(pos * 0.1)*0.5;
                 force += expDir * energy * 20.0;
             }
 
-            // Audio Influence 
-            if (uAudioData.x > 0.7) { // Bass beat
-                force += normalize(pos) * (uAudioData.x * 25.0);
-            }
+            if (uAudioData.x > 0.7) force += normalize(pos) * (uAudioData.x * 25.0);
 
-            // Hand Physics
             vec3 dir1 = uHand1 - pos; float d1 = length(dir1);
             if (d1 < 15.0) force += normalize(dir1) * (15.0 - d1) * uHandDist1 * 5.0;
             
             vec3 dir2 = uHand2 - pos; float d2 = length(dir2);
             if (d2 < 15.0) force += normalize(dir2) * (15.0 - d2) * uHandDist2 * 5.0;
 
-            // General Turbulence
             force += curlNoise(pos * 0.5 + uTime) * (1.0 + uAudioData.y * 3.0 + uAudioData.z * 5.0);
 
             vel += force * uDelta;
-            vel *= 0.90; // Dampening
+            vel *= 0.90;
 
             float maxSpeed = (uIntent == 1 || energy > 1.0) ? 50.0 : 25.0;
             if(length(vel) > maxSpeed) vel = normalize(vel) * maxSpeed;
@@ -540,7 +489,6 @@
             gl_PointSize = (4.0 + speed * 0.1) / -mvPosition.z;
             gl_Position = projectionMatrix * mvPosition;
             
-            // Mix colors based on speed & position
             float mixVal = smoothstep(0.0, 20.0, speed) * 0.5 + (sin(pos.y * 0.1) * 0.5 + 0.5);
             vec3 color = mix(uColorA, uColorB, mixVal);
             vColor = vec4(color, 0.7 + speed * 0.01);
@@ -557,7 +505,6 @@
         }
     </script>
 
-    <!-- Brain Core & HUD Ring Shaders -->
     <script type="x-shader/x-vertex" id="brain-vs">
         varying vec3 vNormal; varying vec3 vPos;
         void main() {
@@ -575,15 +522,48 @@
         }
     </script>
 
-    <script>
-        /**
-         * Neural Visual Brain Engine
-         * Combines NLP, Speech API, WebAudio, Three.js GPGPU, and MediaPipe
-         */
+    <!-- Main ES Module Implementation -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-        const FBO_WIDTH = 512; // 262,144 particles
+        // Custom Shader Pass
+        const NeuralDistortionShader = {
+            uniforms: {
+                "tDiffuse": { value: null },
+                "uTime": { value: 0.0 },
+                "uIntensity": { value: 0.0 },
+                "uDistortion": { value: 0.0 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float uTime;
+                uniform float uIntensity;
+                uniform float uDistortion;
+                varying vec2 vUv;
+                void main() {
+                    vec2 uv = vUv;
+                    uv.y += sin(uv.x * 20.0 + uTime * 5.0) * uDistortion * 0.01;
+                    uv.x += cos(uv.y * 20.0 + uTime * 5.0) * uDistortion * 0.01;
+                    float caOffset = 0.002 * uIntensity;
+                    float r = texture2D(tDiffuse, uv + vec2(caOffset, 0.0)).r;
+                    float g = texture2D(tDiffuse, uv).g;
+                    float b = texture2D(tDiffuse, uv - vec2(caOffset, 0.0)).b;
+                    gl_FragColor = vec4(r, g, b, 1.0);
+                }
+            `
+        };
 
-        // NLP Intents Mapping
+        const FBO_WIDTH = 512;
+
         const INTENTS = {
             COMBAT: {
                 keys: ['قتال', 'معركة', 'أحمر', 'دمر', 'هجوم', 'combat'], intentId: 1, theme: 'combat',
@@ -622,30 +602,50 @@
                 this.initGPGPU();
                 this.initSpeech();
                 this.initAudio();
-                this.initMediaPipe();
                 this.initUI();
+
+                // Dynamically import MediaPipe via standard script tags to ensure compatibility 
+                // since they expose globals instead of reliable ES modules.
+                this.loadMediaPipe().then(() => {
+                    this.initMediaPipe();
+                    document.getElementById('loader').style.opacity = 0;
+                    setTimeout(() => {
+                        document.getElementById('loader').style.display = 'none';
+                        document.getElementById('ui-layer').classList.remove('hidden');
+                    }, 1000);
+                });
 
                 this.clock = new THREE.Clock();
                 this.state = {
                     intent: 0, theme: 'default', mode: 0, scale: 1.0, energy: 0.0,
                     h1: new THREE.Vector3(), h2: new THREE.Vector3(),
-                    hd1: 0, hd2: 0, // hand dist (force)
+                    hd1: 0, hd2: 0,
                     audioBass: 0, audioMid: 0, speechSync: 0
                 };
 
                 this.nlpTimeout = null;
-
-                // Text rendering canvas
                 this.textCanvas = document.getElementById('text-canvas');
                 this.textCtx = this.textCanvas.getContext('2d');
                 this.textTexture = new THREE.DataTexture(new Float32Array(FBO_WIDTH * FBO_WIDTH * 4), FBO_WIDTH, FBO_WIDTH, THREE.RGBAFormat, THREE.FloatType);
 
-                document.getElementById('loader').style.opacity = 0;
-                setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.getElementById('ui-layer').classList.remove('hidden'); }, 1000);
                 this.animate();
             }
 
-            // --- GRAPHICS & POST PROCESSING --- //
+            // Using ES module dynamic script loading for external non-ESM libs
+            loadMediaPipe() {
+                return new Promise((resolve) => {
+                    const script1 = document.createElement('script');
+                    script1.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js';
+                    document.body.appendChild(script1);
+                    script1.onload = () => {
+                        const script2 = document.createElement('script');
+                        script2.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
+                        document.body.appendChild(script2);
+                        script2.onload = resolve;
+                    };
+                });
+            }
+
             initGraphics() {
                 this.scene = new THREE.Scene();
                 this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -657,14 +657,14 @@
                 this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 document.body.appendChild(this.renderer.domElement);
 
-                this.composer = new THREE.EffectComposer(this.renderer);
-                this.renderPass = new THREE.RenderPass(this.scene, this.camera);
+                this.composer = new EffectComposer(this.renderer);
+                this.renderPass = new RenderPass(this.scene, this.camera);
                 this.composer.addPass(this.renderPass);
 
-                this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 0.4, 0.85);
+                this.bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 0.4, 0.85);
                 this.composer.addPass(this.bloomPass);
 
-                this.neuralPass = new THREE.ShaderPass(NeuralDistortionShader);
+                this.neuralPass = new ShaderPass(NeuralDistortionShader);
                 this.composer.addPass(this.neuralPass);
 
                 window.addEventListener('resize', () => {
@@ -679,7 +679,6 @@
                 this.coreGrp = new THREE.Group();
                 this.scene.add(this.coreGrp);
 
-                // Central Energy Sphere
                 const geo = new THREE.IcosahedronGeometry(6, 4);
                 this.brainMat = new THREE.ShaderMaterial({
                     vertexShader: document.getElementById('brain-vs').textContent,
@@ -690,20 +689,17 @@
                 const sphere = new THREE.Mesh(geo, this.brainMat);
                 this.coreGrp.add(sphere);
 
-                // Holographic Rings
                 for (let i = 0; i < 3; i++) {
                     const rgeo = new THREE.RingGeometry(8 + i * 2, 8.2 + i * 2, 64);
                     const rmat = new THREE.MeshBasicMaterial({ color: 0x8a2be2, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
                     const ring = new THREE.Mesh(rgeo, rmat);
                     ring.rotation.x = Math.random() * Math.PI;
                     ring.rotation.y = Math.random() * Math.PI;
-                    // Custom user data to animate
                     ring.userData = { rx: Math.random() * 0.02, ry: Math.random() * 0.02 };
                     this.coreGrp.add(ring);
                 }
             }
 
-            // --- GPGPU PARTICLES --- //
             initGPGPU() {
                 this.gpu = new GPUComputationRenderer(FBO_WIDTH, FBO_WIDTH, this.renderer);
                 const dtPos = this.gpu.createTexture();
@@ -738,9 +734,8 @@
 
                 this.gpu.init();
 
-                // Particle Geometry rendering
                 const geo = new THREE.BufferGeometry();
-                const uvs = new Float32Array(FBO_WIDTH * FBO_WIDTH * 2); // Only need XY for lookup
+                const uvs = new Float32Array(FBO_WIDTH * FBO_WIDTH * 2);
                 let p = 0;
                 for (let i = 0; i < FBO_WIDTH; i++) {
                     for (let j = 0; j < FBO_WIDTH; j++) {
@@ -765,7 +760,6 @@
                 this.scene.add(this.points);
             }
 
-            // --- SPEECH & NLP --- //
             initSpeech() {
                 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 if (!window.SpeechRecognition) return;
@@ -782,7 +776,7 @@
                     for (let i = e.resultIndex; i < e.results.length; ++i) text += e.results[i][0].transcript;
 
                     document.getElementById('ai-speech-text').innerText = text;
-                    this.state.speechSync = 1.0; // Trigger distortion shader
+                    this.state.speechSync = 1.0;
 
                     if (e.results[e.results.length - 1].isFinal) {
                         this.parseIntent(text);
@@ -806,29 +800,26 @@
                     document.getElementById('ai-intent').innerText = `INTENT: [${foundIntent.theme.toUpperCase()}] | ENGAGING: TRUE`;
                     this.state.intent = foundIntent.intentId || 0;
 
-                    // Update Colors & Theme
                     document.body.className = `theme-${foundIntent.theme}`;
                     this.pMat.uniforms.uColorA.value.setHex(foundIntent.cA);
                     this.pMat.uniforms.uColorB.value.setHex(foundIntent.cB);
                     this.brainMat.uniforms.color.value.setHex(foundIntent.cA);
 
-                    // TTS Reply
                     if (foundIntent.reply) {
                         this.speak(foundIntent.reply);
                     }
 
-                    // Special Actions
                     if (foundIntent.action === 'cinema') {
                         document.getElementById('ui-layer').classList.add('hidden');
                         document.getElementById('cinematic-title').style.opacity = 1;
                         if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
                     }
                     if (foundIntent.action === 'explode') {
-                        this.state.energy = 5.0; // High force
+                        this.state.energy = 5.0;
                         this.bloomPass.strength = 3.0;
                     }
                     if (foundIntent.action === 'easterEgg') {
-                        this.bloomPass.strength = 4.0; // Mega flash
+                        this.bloomPass.strength = 4.0;
                     }
                 }
             }
@@ -837,17 +828,16 @@
                 if (this.synth.speaking) this.synth.cancel();
                 const u = new SpeechSynthesisUtterance(txt);
                 u.lang = 'ar-SA';
-                u.rate = 1.1; u.pitch = 0.8; // robotic feel
+                u.rate = 1.1; u.pitch = 0.8;
                 this.synth.speak(u);
             }
 
             renderTextToParticles(text) {
-                this.state.mode = 2; // Text mode
+                this.state.mode = 2;
                 this.textCtx.fillStyle = 'black'; this.textCtx.fillRect(0, 0, 1024, 1024);
                 this.textCtx.fillStyle = 'white'; this.textCtx.font = 'bold 120px Tajawal';
                 this.textCtx.textAlign = 'center'; this.textCtx.textBaseline = 'middle';
 
-                // Max length wrap roughly
                 let lines = [];
                 if (text.length > 20) {
                     lines.push(text.substring(0, text.length / 2));
@@ -875,12 +865,10 @@
                 }
                 this.textTexture.needsUpdate = true;
 
-                // Revert to flow
                 clearTimeout(this.nlpTimeout);
                 this.nlpTimeout = setTimeout(() => { this.state.mode = 0; }, 4000);
             }
 
-            // --- AUDIO ENGINE --- //
             initAudio() {
                 this.audioActive = false;
                 document.getElementById('btn-mic').onclick = async () => {
@@ -914,10 +902,10 @@
                 };
             }
 
-            // --- MEDIA PIPE HANDS --- //
             initMediaPipe() {
+                if (!window.Hands || !window.Camera) return;
                 const video = document.getElementById('video');
-                const hands = new Hands({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+                const hands = new window.Hands({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
                 hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.6 });
                 hands.onResults((res) => {
                     this.state.hd1 = 0; this.state.hd2 = 0;
@@ -926,17 +914,15 @@
                         let lm1 = res.multiHandLandmarks[0];
                         this.state.h1.set((lm1[9].x - 0.5) * 60, -(lm1[9].y - 0.5) * 60, 0);
 
-                        // Fist vs Open Palm
                         let open1 = 0; for (let tip of [8, 12, 16, 20]) if (lm1[tip].y < lm1[tip - 2].y) open1++;
-                        if (open1 === 0) { this.state.hd1 = -5.0; this.state.energy = 2.0; } // Explosion
-                        else { this.state.hd1 = 2.0; this.state.energy = 0.0; } // Attract
+                        if (open1 === 0) { this.state.hd1 = -5.0; this.state.energy = 2.0; }
+                        else { this.state.hd1 = 2.0; this.state.energy = 0.0; }
 
-                        // Pinch distance
                         let dx = lm1[4].x - lm1[8].x, dy = lm1[4].y - lm1[8].y;
                         this.state.scale = Math.max(0.5, 1.0 + (0.1 - Math.sqrt(dx * dx + dy * dy)) * 5.0);
 
                         if (res.multiHandLandmarks.length > 1) {
-                            this.state.mode = 1; // Split state
+                            this.state.mode = 1;
                             let lm2 = res.multiHandLandmarks[1];
                             this.state.h2.set((lm2[9].x - 0.5) * 60, -(lm2[9].y - 0.5) * 60, 0);
                             let open2 = 0; for (let tip of [8, 12, 16, 20]) if (lm2[tip].y < lm2[tip - 2].y) open2++;
@@ -949,7 +935,7 @@
                     }
                 });
 
-                try { new Camera(video, { onFrame: async () => await hands.send({ image: video }), width: 640, height: 480 }).start(); } catch (e) { }
+                try { new window.Camera(video, { onFrame: async () => await hands.send({ image: video }), width: 640, height: 480 }).start(); } catch (e) { }
             }
 
             initUI() {
@@ -976,13 +962,11 @@
                 };
             }
 
-            // --- RENDER LOOP --- //
             animate() {
                 requestAnimationFrame(() => this.animate());
                 const dt = Math.min(this.clock.getDelta(), 0.1);
                 const time = this.clock.getElapsedTime();
 
-                // Audio extraction
                 if (this.audioActive && this.analyser) {
                     this.analyser.getByteFrequencyData(this.freqData);
                     let b = 0, m = 0;
@@ -991,31 +975,26 @@
                     this.state.audioBass += ((b / 5 / 255) - this.state.audioBass) * 0.2;
                     this.state.audioMid += ((m / 20 / 255) - this.state.audioMid) * 0.2;
 
-                    // Brain core reacts to bass
                     this.brainMat.uniforms.intensity.value = 1.0 + this.state.audioBass * 2.0;
                     const scaleC = 1.0 + this.state.audioBass * 0.5;
                     this.coreGrp.children[0].scale.set(scaleC, scaleC, scaleC);
                 }
 
-                // Decay distortion & energy
                 this.state.speechSync *= 0.95;
                 this.state.energy *= 0.95;
-                this.bloomPass.strength += (1.8 - this.bloomPass.strength) * 0.05; // Return to baseline
+                this.bloomPass.strength += (1.8 - this.bloomPass.strength) * 0.05;
 
-                // Update Shaders
                 this.neuralPass.uniforms.uTime.value = time;
                 this.neuralPass.uniforms.uIntensity.value = 1.0 + this.state.speechSync * 5.0 + this.state.energy;
                 this.neuralPass.uniforms.uDistortion.value = this.state.speechSync;
 
-                // Rotate Core Rings
                 for (let i = 1; i <= 3; i++) {
                     let r = this.coreGrp.children[i];
-                    let speedM = (this.state.intent === 2) ? 5.0 : 1.0; // Faster on analysis
+                    let speedM = (this.state.intent === 2) ? 5.0 : 1.0;
                     r.rotation.x += r.userData.rx * speedM;
                     r.rotation.y += r.userData.ry * speedM;
                 }
 
-                // GPGPU
                 this.velUnif.uTime.value = time;
                 this.velUnif.uDelta.value = dt;
                 this.velUnif.uTargetParams.value.set(this.state.mode, this.state.scale, this.state.energy);
@@ -1032,7 +1011,6 @@
                 this.pMat.uniforms.tPos.value = this.gpu.getCurrentRenderTarget(this.posVar).texture;
                 this.pMat.uniforms.tVel.value = this.gpu.getCurrentRenderTarget(this.velVar).texture;
 
-                // Cinematic camera motion
                 if (document.getElementById('ui-layer').classList.contains('hidden')) {
                     this.camera.position.x = Math.sin(time * 0.1) * 15;
                     this.camera.position.z = Math.cos(time * 0.1) * 30 + 10;
@@ -1045,7 +1023,6 @@
 
                 this.composer.render();
 
-                // Update UI data
                 if (Math.random() > 0.9) {
                     document.getElementById('fps-val').innerText = Math.round(1 / dt);
                     let mStr = ['CALM', 'SPLIT LINK', 'NEURAL TEXT'][this.state.mode];
