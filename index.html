@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GPGPU Cinematic Particle Engine | TouchDesigner Quality</title>
+    <title>الواجهة الكونية العصبية</title>
     <style>
         :root {
             --primary: #8a2be2;
             --secondary: #00ffff;
             --bg-dark: #020205;
             --text-main: #ffffff;
-            --font-main: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --font-main: "Tajawal", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body,
@@ -54,18 +54,18 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 40px;
+            padding: 30px;
             box-sizing: border-box;
             transition: opacity 1s ease;
         }
 
         .hud-panel {
-            background: rgba(2, 2, 5, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(10, 5, 20, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px;
-            padding: 24px;
+            padding: 20px;
             pointer-events: auto;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
@@ -74,132 +74,84 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            pointer-events: none;
         }
 
-        .header-title {
-            pointer-events: auto;
-        }
-
-        h1 {
+        .header-title h1 {
             margin: 0;
-            font-size: 1.2rem;
-            font-weight: 300;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        h1 span {
+            font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary);
-            text-shadow: 0 0 20px var(--primary);
-            transition: color 1s;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            line-height: 1.2;
         }
 
         .subtitle {
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.5);
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            margin-top: 8px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+            letter-spacing: 1px;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .controls-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
 
-        .stat-item {
+        .control-group {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            gap: 5px;
         }
 
-        .stat-value {
-            font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
-            font-size: 1rem;
-            color: var(--secondary);
-            text-shadow: 0 0 10px var(--secondary);
-            transition: color 1s;
+        .control-group label {
+            font-size: 0.8rem;
+            color: #ccc;
         }
 
-        .stat-label {
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-top: 4px;
+        .control-group input[type=range] {
+            width: 120px;
+            accent-color: var(--secondary);
         }
 
         .bottom-bar {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            pointer-events: none;
-        }
-
-        .controls-info {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.6);
-            pointer-events: auto;
-            max-width: 320px;
-            line-height: 1.8;
-            letter-spacing: 1px;
-        }
-
-        .controls-info strong {
-            color: #fff;
-            margin-bottom: 12px;
-            display: block;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-size: 0.7rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 8px;
-        }
-
-        .controls-info ul {
-            margin: 0;
-            padding-left: 20px;
-            list-style-type: square;
-        }
-
-        .controls-info li::marker {
-            color: var(--primary);
-            transition: color 1s;
         }
 
         .action-buttons {
             display: flex;
-            gap: 16px;
+            gap: 10px;
             pointer-events: auto;
+            flex-wrap: wrap;
         }
 
         button {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.8);
-            padding: 12px 28px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 10px 20px;
             border-radius: 6px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
         }
 
         button:hover,
         button.active {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 255, 255, 0.15);
             border-color: var(--secondary);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
             transform: translateY(-2px);
         }
 
+        /* Loading Screen */
         #loader {
             position: absolute;
             top: 0;
@@ -212,44 +164,16 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
         .spinner {
             width: 60px;
             height: 60px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             border-top-color: var(--secondary);
-            border-right-color: var(--primary);
-            animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-            margin-bottom: 30px;
-        }
-
-        .loader-text {
-            font-size: 0.7rem;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.5);
-            animation: pulse 2s infinite;
-        }
-
-        #overlay-status {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 3rem;
-            font-weight: 100;
-            letter-spacing: 20px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 0 40px var(--secondary);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s;
-            z-index: 5;
-            text-align: center;
+            animation: spin 1s infinite linear;
+            margin-bottom: 20px;
         }
 
         @keyframes spin {
@@ -258,91 +182,74 @@
             }
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 0.4;
-            }
-
-            50% {
-                opacity: 1;
-            }
-        }
-
-        #speech-text {
-            position: absolute;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 2.5rem;
-            font-weight: 300;
-            color: rgba(255, 255, 255, 0.95);
-            text-shadow: 0 0 20px var(--secondary), 0 0 40px var(--primary);
-            pointer-events: none;
-            z-index: 20;
-            text-align: center;
-            max-width: 80%;
-            opacity: 0;
-            transition: opacity 0.5s;
-            letter-spacing: 2px;
-            direction: rtl;
-            /* Arabic support */
-        }
-
         .hidden {
             opacity: 0 !important;
             pointer-events: none !important;
         }
+
+        /* Hidden canvas for text rendering */
+        #text-canvas {
+            display: none;
+        }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
     <div id="loader">
         <div class="spinner"></div>
-        <div class="loader-text" id="loader-status">Booting Neural Core</div>
+        <h2 style="font-weight: 300; letter-spacing: 2px;">يتم تهيئة المحرك الكوني...</h2>
     </div>
-
-    <div id="overlay-status"></div>
 
     <div id="ui-layer" class="hidden">
         <div class="top-bar">
             <div class="header-title hud-panel">
-                <h1>Astra<span>Core</span></h1>
-                <div class="subtitle">GPGPU Neural Simulation</div>
+                <h1>الواجهة الكونية العصبية</h1>
+                <div class="subtitle">نظام تفاعلي بالصوت والصورة المعززة</div>
+
+                <div class="controls-container">
+                    <div class="control-group">
+                        <label>قوة الانفجار</label>
+                        <input type="range" id="ctrl-force" min="0" max="100" value="50">
+                    </div>
+                    <div class="control-group">
+                        <label>شدة الوهج (Bloom)</label>
+                        <input type="range" id="ctrl-bloom" min="0" max="300" value="150">
+                    </div>
+                    <div class="control-group">
+                        <label>حساسية الميكروفون</label>
+                        <input type="range" id="ctrl-mic" min="10" max="200" value="100">
+                    </div>
+                </div>
             </div>
-            <div class="stats-grid hud-panel">
-                <div class="stat-item"><span class="stat-value" id="fps-counter">00</span><span
-                        class="stat-label">FPS</span></div>
-                <div class="stat-item"><span class="stat-value" id="particle-count">262K</span><span
-                        class="stat-label">Entities</span></div>
-                <div class="stat-item"><span class="stat-value" id="mode-status">AUTO</span><span
-                        class="stat-label">State</span></div>
-                <div class="stat-item"><span class="stat-value" id="theme-status">COSMIC</span><span
-                        class="stat-label">Theme</span></div>
+            <div class="header-title hud-panel" style="text-align: left;">
+                <div id="fps-display" style="color: var(--secondary); font-size: 1.5rem; font-weight: bold;">60 FPS
+                </div>
+                <div id="mode-display" style="color: #aaa; font-size: 0.8rem;">وضع التكوين الكوني</div>
             </div>
         </div>
+
         <div class="bottom-bar">
-            <div class="controls-info hud-panel">
-                <strong>Neural Link Gestures</strong>
-                <ul>
-                    <li>Pinch: Gravitational Scale</li>
-                    <li>Fist: Kinetic Shockwave</li>
-                    <li>Swipe: Metamorphosis</li>
-                    <li>Palm Open: Attractor Mode</li>
-                    <li>Circular: Vortex Spin</li>
-                </ul>
+            <div class="hud-panel" style="max-width: 400px; color: #ddd; font-size: 0.85rem; line-height: 1.6;">
+                <strong>التحكم:</strong><br>
+                🎤 فعل الميكروفون وتحدث لتشكيل الحروف بالنجوم.<br>
+                💥 قل <b>"انفجار"</b> أو <b>"قوة"</b> لتدمير النجوم.<br>
+                ✋ استخدم الكاميرا لتحريك النجوم بيدك.<br>
+                👁️ يتم الانتقال بين الأوضاع تلقائياً بصياغة ناعمة.
             </div>
+
             <div class="action-buttons">
-                <button id="btn-audio">Acoustic Link</button>
-                <button id="btn-theme">Cycle Theme</button>
+                <button id="btn-mic">🎙️ تفعيل الميكروفون / الأوامر الصوتية</button>
+                <button id="btn-record">🔴 تسجيل 30 ثانية</button>
+                <button id="btn-export">📸 لقطة 4K</button>
+                <button id="btn-cinema">🎬 الوضع السينمائي</button>
             </div>
         </div>
     </div>
 
-    <div id="speech-text"></div>
-
+    <!-- For Speech to Particles -->
+    <canvas id="text-canvas" width="1024" height="1024"></canvas>
     <video id="video"></video>
 
     <!-- Dependencies -->
@@ -354,12 +261,11 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/VignetteShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FilmShader.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 
-    <!-- GPGPU Shaders -->
+    <!-- Shaders -->
     <script type="x-shader/x-fragment" id="compute-position">
         uniform float uTime;
         uniform float uDelta;
@@ -369,165 +275,96 @@
             vec3 pos = tmpPos.xyz;
             vec4 tmpVel = texture2D(textureVelocity, uv);
             vec3 vel = tmpVel.xyz;
-            float life = tmpPos.w;
-
-            // Apply velocity
-            pos += vel * uDelta * 50.0;
             
-            // Re-spawn logic
-            life -= uDelta * (0.1 + uv.x * 0.2);
-            if (life <= 0.0) {
-                // Respawn at origin or specific bounds based on shape later, but GPGPU velocity handles the journey
-                // Actually, best to just let it loop smoothly or respawn near center
-                pos = vec3(uv.x * 0.01, uv.y * 0.01, 0.0);
-                life = 1.0;
-            }
-
-            gl_FragColor = vec4(pos, life);
+            pos += vel * uDelta;
+            
+            gl_FragColor = vec4(pos, 1.0);
         }
     </script>
 
     <script type="x-shader/x-fragment" id="compute-velocity">
         uniform float uTime;
         uniform float uDelta;
-        uniform int uShape;
-        uniform vec3 uAudioData; // x: bass, y: mid, z: high
-        uniform vec3 uHandPos;
-        uniform float uHandForce; // Positive for attract, negative for explosion
-        uniform float uPinchScale;
-        uniform float uVortex;
+        uniform vec3 uTarget; // Dynamic attractor
+        uniform sampler2D uTextTarget;
+        uniform int uMode; // 0: Flow, 1: Text, 2: Explosion
+        uniform vec3 uAudioData;
         
-        // Simplex 3D Noise function (Ashima Arts)
-        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-        float snoise(vec3 v) {
-            const vec2  C = vec2(1.0/6.0, 1.0/3.0); const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-            vec3 i  = floor(v + dot(v, C.yyy)); vec3 x0 = v - i + dot(i, C.xxx);
-            vec3 g = step(x0.yzx, x0.xyz); vec3 l = 1.0 - g;
-            vec3 i1 = min(g.xyz, l.zxy); vec3 i2 = max(g.xyz, l.zxy);
-            vec3 x1 = x0 - i1 + C.xxx; vec3 x2 = x0 - i2 + C.yyy; vec3 x3 = x0 - D.yyy;
-            i = mod289(i);
-            vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-            float n_ = 0.142857142857; vec3  ns = n_ * D.wyz - D.xzx;
-            vec4 j = p - 49.0 * floor(p * ns.z * ns.z); vec4 x_ = floor(j * ns.z); vec4 y_ = floor(j - 7.0 * x_);
-            vec4 x = x_ *ns.x + ns.yyyy; vec4 y = y_ *ns.x + ns.yyyy; vec4 h = 1.0 - abs(x) - abs(y);
-            vec4 b0 = vec4(x.xy, y.xy); vec4 b1 = vec4(x.zw, y.zw);
-            vec4 s0 = floor(b0)*2.0 + 1.0; vec4 s1 = floor(b1)*2.0 + 1.0; vec4 sh = -step(h, vec4(0.0));
-            vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy; vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
-            vec3 p0 = vec3(a0.xy,h.x); vec3 p1 = vec3(a0.zw,h.y); vec3 p2 = vec3(a1.xy,h.z); vec3 p3 = vec3(a1.zw,h.w);
-            vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-            p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-            vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-            m = m * m; return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-        }
-        vec3 curlNoise(vec3 p) {
-            float e = 0.1;
-            vec3 dx = vec3(e, 0.0, 0.0); vec3 dy = vec3(0.0, e, 0.0); vec3 dz = vec3(0.0, 0.0, e);
-            vec3 p_x0 = vec3(snoise(p - dx), snoise(p - dx + vec3(12.3, 45.6, 78.9)), snoise(p - dx + vec3(98.7, 65.4, 32.1)));
-            vec3 p_x1 = vec3(snoise(p + dx), snoise(p + dx + vec3(12.3, 45.6, 78.9)), snoise(p + dx + vec3(98.7, 65.4, 32.1)));
-            vec3 p_y0 = vec3(snoise(p - dy), snoise(p - dy + vec3(12.3, 45.6, 78.9)), snoise(p - dy + vec3(98.7, 65.4, 32.1)));
-            vec3 p_y1 = vec3(snoise(p + dy), snoise(p + dy + vec3(12.3, 45.6, 78.9)), snoise(p + dy + vec3(98.7, 65.4, 32.1)));
-            vec3 p_z0 = vec3(snoise(p - dz), snoise(p - dz + vec3(12.3, 45.6, 78.9)), snoise(p - dz + vec3(98.7, 65.4, 32.1)));
-            vec3 p_z1 = vec3(snoise(p + dz), snoise(p + dz + vec3(12.3, 45.6, 78.9)), snoise(p + dz + vec3(98.7, 65.4, 32.1)));
-            float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;
-            float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;
-            float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;
-            const float divisor = 1.0 / (2.0 * e);
-            return normalize(vec3(x , y , z) * divisor);
-        }
+        uniform vec3 uHand1;
+        uniform float uHandForce;
 
-        vec3 getTargetPos(vec2 uv, float id, float time) {
-            vec3 target = vec3(0.0);
-            float u = uv.x * 2.0 * 3.14159;
-            float v = uv.y * 3.14159;
-            
-            if (uShape == 0) { // Sphere
-                float r = 10.0;
-                target.x = r * sin(v) * cos(u);
-                target.y = r * sin(v) * sin(u);
-                target.z = r * cos(v);
-            } else if (uShape == 1) { // Torus
-                float R = 8.0; float r = 3.0;
-                target.x = (R + r * cos(v)) * cos(u);
-                target.y = (R + r * cos(v)) * sin(u);
-                target.z = r * sin(v);
-            } else if (uShape == 2) { // Galaxy Spiral
-                float spiralT = uv.x * 10.0;
-                float angle = spiralT * 3.14159 + (uv.y > 0.5 ? 3.14159 : 0.0);
-                float radius = spiralT * 2.0;
-                target.x = cos(angle) * radius;
-                target.z = sin(angle) * radius;
-                target.y = (uv.y - 0.5) * (15.0 - radius); // bulge
-            } else if (uShape == 3) { // Neural Web (Organic Noise bounds)
-                target = vec3(cos(u)*8.0, sin(v)*8.0, sin(u)*8.0) + curlNoise(vec3(u, v, time*0.1))*5.0;
-            }
-            return target * uPinchScale * (1.0 + uAudioData.x * 0.2);
+        vec3 curlNoise(vec3 p) {
+            float n1 = sin(p.y*2.0) + cos(p.z*2.0);
+            float n2 = sin(p.z*2.0) + cos(p.x*2.0);
+            float n3 = sin(p.x*2.0) + cos(p.y*2.0);
+            return vec3(n1, n2, n3);
         }
 
         void main() {
             vec2 uv = gl_FragCoord.xy / resolution.xy;
-            float id = uv.x + uv.y * resolution.x;
             vec4 tmpPos = texture2D(texturePosition, uv);
             vec3 pos = tmpPos.xyz;
             vec4 tmpVel = texture2D(textureVelocity, uv);
             vec3 vel = tmpVel.xyz;
 
-            vec3 target = getTargetPos(uv, id, uTime);
-            
-            // Forces
-            vec3 dir = target - pos;
-            float dist = length(dir);
-            vec3 force = normalize(dir) * min(dist, 10.0) * 0.1; // Attraction to shape
+            vec3 force = vec3(0.0);
 
-            // Curl Noise Turbulence (highly active with mid freq)
-            vec3 turbulence = curlNoise(pos * 0.1 + uTime * 0.2) * (1.0 + uAudioData.y * 3.0);
-            
-            // Hand Physics (Gravitational/Repulsion)
-            vec3 handDir = uHandPos - pos;
-            float handDist = length(handDir);
-            if(handDist < 15.0) {
-                float hForce = (1.0 - (handDist/15.0)) * uHandForce;
-                force += normalize(handDir) * hForce * 5.0;
+            // Shape Logic
+            if (uMode == 0) {
+                // Galaxy Spiral
+                float angle = uv.x * 20.0 + uTime * 0.5;
+                float radius = uv.y * 20.0;
+                vec3 target = vec3(cos(angle)*radius, (uv.y - 0.5)*5.0, sin(angle)*radius);
+                force += (target - pos) * 0.5;
+            } else if (uMode == 1) {
+                // Text Target Shape from Texture
+                vec4 tData = texture2D(uTextTarget, uv);
+                vec3 target = tData.xyz; 
+                // tData.w is 1.0 if part of text
+                if(tData.w > 0.0) {
+                    force += (target - pos) * 2.0;
+                } else {
+                    // Wander gently if not attached
+                    force += curlNoise(pos * 0.1 + uTime * 0.2) * 2.0;
+                    force += (-pos * 0.1); // pull to center
+                }
+            } else if (uMode == 2) {
+                // Explosion
+                vec3 dir = normalize(pos + vec3(0.001));
+                force += dir * 50.0;
             }
 
-            // Vortex motion
-            if (uVortex > 0.0) {
-                vec3 vDir = normalize(vec3(-pos.z, 0.0, pos.x)); // tangential
-                force += vDir * uVortex * 2.0;
+            // Audio Influence (Bass -> Repel/Expand)
+            if(uAudioData.x > 0.6) { // Beat
+                force += normalize(pos) * (uAudioData.x * 20.0);
             }
 
-            // Explosion Override
-            if (uHandForce < -5.0) {
-                vec3 expDir = normalize(pos) + turbulence * 0.5;
-                force += expDir * abs(uHandForce);
+            // Hand Influence
+            vec3 hDir = uHand1 - pos;
+            float hDist = length(hDir);
+            if(hDist < 10.0) {
+                force += normalize(hDir) * (10.0 - hDist) * uHandForce * 2.0;
             }
 
-            // Integration
+            // Turbulence
+            force += curlNoise(pos * 0.5 + uTime) * (1.0 + uAudioData.y * 2.0);
+
             vel += force * uDelta;
-            vel += turbulence * uDelta * 2.0;
-            vel *= 0.95; // Friction
+            vel *= 0.92; // Friction
 
-            // Max velocity cap
-            float speed = length(vel);
-            if(speed > 10.0) vel = normalize(vel) * 10.0;
+            float maxSpeed = 30.0;
+            if (length(vel) > maxSpeed) vel = normalize(vel) * maxSpeed;
 
             gl_FragColor = vec4(vel, 1.0);
         }
     </script>
 
-    <!-- Render Shaders -->
     <script type="x-shader/x-vertex" id="render-vs">
         uniform sampler2D texturePosition;
         uniform sampler2D textureVelocity;
-        uniform vec3 uColor1;
-        uniform vec3 uColor2;
         uniform float uHueShift;
-        uniform float uAudioHigh;
         
         varying vec4 vColor;
-        varying float vAlpha;
 
         vec3 hueShift(vec3 color, float hue) {
             const vec3 k = vec3(0.57735, 0.57735, 0.57735);
@@ -538,468 +375,402 @@
         void main() {
             vec4 posData = texture2D(texturePosition, position.xy);
             vec3 pos = posData.xyz;
-            float life = posData.w;
-
             vec4 velData = texture2D(textureVelocity, position.xy);
-            float speed = length(velData.xyz);
-
+            
             vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-            gl_PointSize = (15.0 + uAudioHigh * 20.0) / -mvPosition.z;
+            gl_PointSize = 6.0 / -mvPosition.z;
             gl_Position = projectionMatrix * mvPosition;
 
-            // Coloring based on speed and UV
-            float mixVal = smoothstep(0.0, 5.0, speed);
-            vec3 baseColor = mix(uColor1, uColor2, mixVal + position.x);
-            baseColor = hueShift(baseColor, uHueShift * 6.28);
-            
-            // Life fade
-            vAlpha = smoothstep(0.0, 0.2, life) * smoothstep(1.0, 0.8, life) * 0.8;
-            vColor = vec4(baseColor, 1.0);
+            float speed = length(velData.xyz);
+            vec3 color = mix(vec3(0.5, 0.0, 1.0), vec3(0.0, 1.0, 1.0), min(speed * 0.1, 1.0));
+            color = hueShift(color, uHueShift);
+
+            vColor = vec4(color, 0.8 + speed * 0.02);
         }
     </script>
     <script type="x-shader/x-fragment" id="render-fs">
         varying vec4 vColor;
-        varying float vAlpha;
         void main() {
             vec2 cxy = 2.0 * gl_PointCoord - 1.0;
             float r = dot(cxy, cxy);
             if (r > 1.0) discard;
-            float core = exp(-r * 3.0);
-            gl_FragColor = vec4(vColor.rgb * core * 1.5, vAlpha * core);
+            float glow = exp(-r * 3.0);
+            gl_FragColor = vec4(vColor.rgb * glow * 1.5, vColor.a * glow);
         }
     </script>
 
+    <!-- App Logic -->
     <script>
-        /**
-         * AAA GPGPU Particle Core
-         * Architecture: TouchDesigner / Unreal Engine Quality
-         */
+        const FBO_WIDTH = 512; // 262k
 
-        const FBO_WIDTH = 512; // 512x512 = 262,144 particles
-        const CONFIG = {
-            themes: [
-                { name: 'COSMIC', c1: 0x8a2be2, c2: 0x00ffff, root1: '#8a2be2', root2: '#00ffff' },
-                { name: 'PLASMA FIRE', c1: 0xff3300, c2: 0xffaa00, root1: '#ff3300', root2: '#ffaa00' },
-                { name: 'ICE MATTER', c1: 0xccffff, c2: 0x0044ff, root1: '#0044ff', root2: '#ccffff' },
-                { name: 'CYBER NEON', c1: 0xff007f, c2: 0x00ff00, root1: '#ff007f', root2: '#00ff00' }
-            ],
-            shapes: ['SPHERE', 'TORUS', 'GALAXY', 'NEURAL']
-        };
-
-        class RenderingEngine {
+        class CoreEngine {
             constructor() {
-                this.scene = new THREE.Scene();
-                this.scene.fog = new THREE.FogExp2(0x020205, 0.015);
-                this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.camera.position.z = 35;
+                this.initThree();
+                this.initGPGPU();
+                this.initAudio();
+                this.initSpeech();
+                this.initMediaPipe();
+                this.initUI();
 
-                this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+                this.clock = new THREE.Clock();
+                this.textCanvas = document.getElementById('text-canvas');
+                this.textCtx = this.textCanvas.getContext('2d');
+                this.textTexture = new THREE.DataTexture(new Float32Array(FBO_WIDTH * FBO_WIDTH * 4), FBO_WIDTH, FBO_WIDTH, THREE.RGBAFormat, THREE.FloatType);
+                this.textTexture.needsUpdate = true;
+
+                this.state = {
+                    mode: 0,
+                    audioData: new THREE.Vector3(),
+                    handPos: new THREE.Vector3(0, 0, 0),
+                    handForce: 1.0,
+                    explosionTimer: 0,
+                    customColor: null
+                };
+
+                this.animate();
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('ui-layer').classList.remove('hidden');
+            }
+
+            initThree() {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.z = 30;
+
+                this.renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true }); // needed for export
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Balance quality/perf
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
                 this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                this.renderer.toneMappingExposure = 1.2;
                 document.body.appendChild(this.renderer.domElement);
 
                 this.composer = new THREE.EffectComposer(this.renderer);
                 this.composer.addPass(new THREE.RenderPass(this.scene, this.camera));
 
-                this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 2.0, 0.5, 0.8);
+                this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
                 this.composer.addPass(this.bloomPass);
 
-                const vigPass = new THREE.ShaderPass(THREE.VignetteShader);
-                vigPass.uniforms["offset"].value = 1.2;
-                vigPass.uniforms["darkness"].value = 1.5;
-                this.composer.addPass(vigPass);
-
-                const filmPass = new THREE.ShaderPass(THREE.FilmShader);
-                filmPass.uniforms["nIntensity"].value = 0.3; // noise
-                filmPass.uniforms["sIntensity"].value = 0;   // scanlines
-                this.composer.addPass(filmPass);
-
-                window.addEventListener('resize', this.onResize.bind(this));
-
-                // Starfield background
-                this.createStars();
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                    this.composer.setSize(window.innerWidth, window.innerHeight);
+                });
             }
 
-            createStars() {
-                const geo = new THREE.BufferGeometry();
-                const pos = new Float32Array(2000 * 3);
-                for (let i = 0; i < 6000; i++) {
-                    pos[i] = (Math.random() - 0.5) * 200;
+            initGPGPU() {
+                this.gpuCompute = new GPUComputationRenderer(FBO_WIDTH, FBO_WIDTH, this.renderer);
+                const dtPos = this.gpuCompute.createTexture();
+                const dtVel = this.gpuCompute.createTexture();
+
+                // Init positions in space
+                const pArr = dtPos.image.data;
+                for (let i = 0; i < pArr.length; i += 4) {
+                    pArr[i] = (Math.random() - 0.5) * 50;
+                    pArr[i + 1] = (Math.random() - 0.5) * 50;
+                    pArr[i + 2] = (Math.random() - 0.5) * 50;
+                    pArr[i + 3] = 1.0;
                 }
-                geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-                const mat = new THREE.PointsMaterial({ color: 0x444455, size: 0.1, transparent: true, opacity: 0.4 });
-                this.stars = new THREE.Points(geo, mat);
-                this.scene.add(this.stars);
-            }
 
-            onResize() {
-                this.camera.aspect = window.innerWidth / window.innerHeight;
-                this.camera.updateProjectionMatrix();
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.composer.setSize(window.innerWidth, window.innerHeight);
-            }
-        }
-
-        class GPUParticleSystem {
-            constructor(engine) {
-                this.engine = engine;
-                this.gpuCompute = new GPUComputationRenderer(FBO_WIDTH, FBO_WIDTH, engine.renderer);
-
-                const dtPosition = this.gpuCompute.createTexture();
-                const dtVelocity = this.gpuCompute.createTexture();
-                this.fillTextures(dtPosition, dtVelocity);
-
-                this.posVar = this.gpuCompute.addVariable("texturePosition", document.getElementById('compute-position').textContent, dtPosition);
-                this.velVar = this.gpuCompute.addVariable("textureVelocity", document.getElementById('compute-velocity').textContent, dtVelocity);
+                this.posVar = this.gpuCompute.addVariable("texturePosition", document.getElementById('compute-position').textContent, dtPos);
+                this.velVar = this.gpuCompute.addVariable("textureVelocity", document.getElementById('compute-velocity').textContent, dtVel);
 
                 this.gpuCompute.setVariableDependencies(this.posVar, [this.posVar, this.velVar]);
                 this.gpuCompute.setVariableDependencies(this.velVar, [this.posVar, this.velVar]);
 
-                this.posUniforms = this.posVar.material.uniforms;
-                this.posUniforms.uTime = { value: 0 };
-                this.posUniforms.uDelta = { value: 0 };
-
                 this.velUniforms = this.velVar.material.uniforms;
                 this.velUniforms.uTime = { value: 0 };
                 this.velUniforms.uDelta = { value: 0 };
-                this.velUniforms.uShape = { value: 0 };
+                this.velUniforms.uMode = { value: 0 };
                 this.velUniforms.uAudioData = { value: new THREE.Vector3() };
-                this.velUniforms.uHandPos = { value: new THREE.Vector3(0, 0, 0) };
-                this.velUniforms.uHandForce = { value: 0 };
-                this.velUniforms.uPinchScale = { value: 1.0 };
-                this.velUniforms.uVortex = { value: 0.0 };
+                this.velUniforms.uHand1 = { value: new THREE.Vector3() };
+                this.velUniforms.uHandForce = { value: 1.0 };
 
-                const error = this.gpuCompute.init();
-                if (error !== null) console.error(error);
+                // Texture for text target mode
+                this.velUniforms.uTextTarget = { value: this.textTexture };
 
-                this.initRenderMaterial();
-            }
+                this.posVar.material.uniforms.uTime = { value: 0 };
+                this.posVar.material.uniforms.uDelta = { value: 0 };
 
-            fillTextures(posTex, velTex) {
-                const posArr = posTex.image.data;
-                const velArr = velTex.image.data;
-                for (let i = 0; i < posArr.length; i += 4) {
-                    posArr[i] = (Math.random() - 0.5) * 50;
-                    posArr[i + 1] = (Math.random() - 0.5) * 50;
-                    posArr[i + 2] = (Math.random() - 0.5) * 50;
-                    posArr[i + 3] = Math.random(); // life
+                this.gpuCompute.init();
 
-                    velArr[i] = velArr[i + 1] = velArr[i + 2] = velArr[i + 3] = 0;
-                }
-            }
-
-            initRenderMaterial() {
-                const geometry = new THREE.BufferGeometry();
-                const positions = new Float32Array(FBO_WIDTH * FBO_WIDTH * 3);
+                const geo = new THREE.BufferGeometry();
+                const uvs = new Float32Array(FBO_WIDTH * FBO_WIDTH * 3);
                 let p = 0;
                 for (let i = 0; i < FBO_WIDTH; i++) {
                     for (let j = 0; j < FBO_WIDTH; j++) {
-                        positions[p++] = (i + 0.5) / FBO_WIDTH;
-                        positions[p++] = (j + 0.5) / FBO_WIDTH;
-                        positions[p++] = 0;
+                        uvs[p++] = (i + 0.5) / FBO_WIDTH;
+                        uvs[p++] = (j + 0.5) / FBO_WIDTH;
+                        uvs[p++] = 0;
                     }
                 }
-                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geo.setAttribute('position', new THREE.BufferAttribute(uvs, 3));
 
-                this.material = new THREE.ShaderMaterial({
+                this.particleMat = new THREE.ShaderMaterial({
                     vertexShader: document.getElementById('render-vs').textContent,
                     fragmentShader: document.getElementById('render-fs').textContent,
                     uniforms: {
                         texturePosition: { value: null },
                         textureVelocity: { value: null },
-                        uColor1: { value: new THREE.Color(CONFIG.themes[0].c1) },
-                        uColor2: { value: new THREE.Color(CONFIG.themes[0].c2) },
-                        uHueShift: { value: 0 },
-                        uAudioHigh: { value: 0 }
+                        uHueShift: { value: 0 }
                     },
                     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
                 });
 
-                this.mesh = new THREE.Points(geometry, this.material);
-                this.engine.scene.add(this.mesh);
+                this.particleMesh = new THREE.Points(geo, this.particleMat);
+                this.scene.add(this.particleMesh);
             }
 
-            update(dt, time) {
-                this.posUniforms.uTime.value = time;
-                this.posUniforms.uDelta.value = dt;
-                this.velUniforms.uTime.value = time;
-                this.velUniforms.uDelta.value = dt;
-
-                this.gpuCompute.compute();
-
-                this.material.uniforms.texturePosition.value = this.gpuCompute.getCurrentRenderTarget(this.posVar).texture;
-                this.material.uniforms.textureVelocity.value = this.gpuCompute.getCurrentRenderTarget(this.velVar).texture;
-            }
-        }
-
-        class AudioEngine {
-            constructor() {
-                this.active = false;
-                this.data = new THREE.Vector3(); // bass, mid, high
-                this.initSpeech();
+            initAudio() {
+                this.audioActive = false;
+                document.getElementById('btn-mic').onclick = async () => {
+                    if (!this.audioCtx) {
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                            this.analyser = this.audioCtx.createAnalyser();
+                            this.analyser.fftSize = 256;
+                            this.audioCtx.createMediaStreamSource(stream).connect(this.analyser);
+                            this.freqData = new Uint8Array(this.analyser.frequencyBinCount);
+                            this.audioActive = true;
+                            if (this.recognition) this.recognition.start();
+                            document.getElementById('btn-mic').classList.add('active');
+                        } catch (e) { alert("يجب السماح بالصوت لاستخدام هذه الميزة"); }
+                    } else {
+                        if (this.audioActive) {
+                            this.audioCtx.suspend(); this.audioActive = false;
+                            if (this.recognition) this.recognition.stop();
+                            document.getElementById('btn-mic').classList.remove('active');
+                        } else {
+                            this.audioCtx.resume(); this.audioActive = true;
+                            if (this.recognition) this.recognition.start();
+                            document.getElementById('btn-mic').classList.add('active');
+                        }
+                    }
+                };
             }
 
             initSpeech() {
                 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 if (window.SpeechRecognition) {
                     this.recognition = new window.SpeechRecognition();
+                    this.recognition.lang = 'ar-SA';
                     this.recognition.continuous = true;
                     this.recognition.interimResults = true;
-                    this.recognition.lang = 'ar-SA'; // Arabic
 
-                    this.recognition.onresult = (event) => {
+                    this.recognition.onresult = (e) => {
                         let text = '';
-                        for (let i = event.resultIndex; i < event.results.length; ++i) {
-                            text += event.results[i][0].transcript;
+                        for (let i = e.resultIndex; i < e.results.length; ++i) {
+                            text += e.results[i][0].transcript;
                         }
-                        const speechEl = document.getElementById('speech-text');
-                        speechEl.innerText = text;
-                        speechEl.style.opacity = 1;
-                        clearTimeout(this.speechTimeout);
-                        this.speechTimeout = setTimeout(() => { speechEl.style.opacity = 0; }, 4000);
+
+                        this.processSpokenText(text);
+
+                        // Trigger magic keywords
+                        if (text.includes('انفجار') || text.includes('قوة') || text.includes('explosion')) {
+                            this.triggerExplosion();
+                        }
+
+                        // Personal name Easter Egg (User change requested: "عند نطق اسمي...")
+                        if (text.includes('اسمي') || text.includes('أحمد') || text.includes('محمد') || text.includes('طارق')) { // Add targeted names
+                            this.particleMat.uniforms.uHueShift.value += 1.0; // Flash universe color
+                        }
                     };
 
                     this.recognition.onend = () => {
-                        if (this.active) {
-                            try { this.recognition.start(); } catch (e) { }
+                        if (this.audioActive) {
+                            try { this.recognition.start(); } catch (err) { }
+                        } else {
+                            this.state.mode = 0; // Back to flow
                         }
                     };
                 }
             }
 
-            async toggle() {
-                if (this.active) {
-                    this.active = false;
-                    if (this.ctx) this.ctx.suspend();
-                    if (this.recognition) this.recognition.stop();
-                    document.getElementById('btn-audio').classList.remove('active');
+            processSpokenText(text) {
+                // Render text into canvas to generate particle targets
+                this.state.mode = 1; // Text mode
+                document.getElementById('mode-display').innerText = "وضع تشكيل الحروف";
+
+                this.textCtx.fillStyle = 'black';
+                this.textCtx.fillRect(0, 0, 1024, 1024);
+                this.textCtx.fillStyle = 'white';
+                this.textCtx.font = 'bold 200px Tajawal';
+                this.textCtx.textAlign = 'center';
+                this.textCtx.textBaseline = 'middle';
+
+                // Wrap text if needed, simplifies logic to just center it
+                this.textCtx.fillText(text, 512, 512);
+
+                const imgData = this.textCtx.getImageData(0, 0, 1024, 1024).data;
+                const texData = this.textTexture.image.data;
+
+                // Randomly assign particles to bright text pixels
+                let pIdx = 0;
+                let validPixels = [];
+                for (let i = 0; i < imgData.length; i += 4) {
+                    if (imgData[i] > 100) {
+                        let idx = i / 4;
+                        validPixels.push({ x: (idx % 1024), y: Math.floor(idx / 1024) });
+                    }
+                }
+
+                if (validPixels.length > 0) {
+                    for (let i = 0; i < texData.length; i += 4) {
+                        let rp = validPixels[Math.floor(Math.random() * validPixels.length)];
+                        // Map 1024x1024 to 3D Space (-20 to 20 approx)
+                        texData[i] = (rp.x - 512) * 0.05;
+                        texData[i + 1] = -(rp.y - 512) * 0.05;
+                        texData[i + 2] = (Math.random() - 0.5) * 2.0; // slight Z depth
+                        texData[i + 3] = 1.0; // active flag
+                    }
                 } else {
-                    if (!this.ctx) {
-                        try {
-                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                            this.analyser = this.ctx.createAnalyser();
-                            this.analyser.fftSize = 256;
-                            this.ctx.createMediaStreamSource(stream).connect(this.analyser);
-                            this.freqData = new Uint8Array(this.analyser.frequencyBinCount);
-                        } catch (e) { alert("Mic required for Acoustic Link"); return; }
-                    }
-                    this.ctx.resume();
-                    this.active = true;
-                    if (this.recognition) {
-                        try { this.recognition.start(); } catch (e) { }
-                    }
-                    document.getElementById('btn-audio').classList.add('active');
+                    for (let i = 0; i < texData.length; i += 4) texData[i + 3] = 0.0;
                 }
+
+                this.textTexture.needsUpdate = true;
+
+                // Clear text mode after delay if not speaking
+                clearTimeout(this.textTimeout);
+                this.textTimeout = setTimeout(() => {
+                    this.state.mode = 0;
+                    document.getElementById('mode-display').innerText = "التدفق الكوني المتصل";
+                }, 3000);
             }
 
-            update() {
-                if (!this.active) {
-                    this.data.set(0, 0, 0); return;
-                }
-                this.analyser.getByteFrequencyData(this.freqData);
-                let b = 0, m = 0, h = 0;
-                for (let i = 0; i < 5; i++) b += this.freqData[i];
-                for (let i = 20; i < 40; i++) m += this.freqData[i];
-                for (let i = 80; i < 120; i++) h += this.freqData[i];
-                // Smooth interpolation to avoid judder
-                this.data.x += ((b / 5) / 255.0 - this.data.x) * 0.2;
-                this.data.y += ((m / 20) / 255.0 - this.data.y) * 0.2;
-                this.data.z += ((h / 40) / 255.0 - this.data.z) * 0.2;
-            }
-        }
+            triggerExplosion() {
+                this.state.mode = 2;
+                document.getElementById('mode-display').innerText = "الانفجار العظيم";
+                let expForce = document.getElementById('ctrl-force').value / 100;
+                this.bloomPass.strength = 3.0 * expForce;
 
-        class AppController {
-            constructor() {
-                this.engine = new RenderingEngine();
-                this.sys = new GPUParticleSystem(this.engine);
-                this.audio = new AudioEngine();
-                this.clock = new THREE.Clock();
-
-                this.state = {
-                    mode: 'AUTO', theme: 0, shape: 0,
-                    targetPinch: 1.0, pinch: 1.0,
-                    targetForce: 0, force: 0,
-                    targetHue: 0, hue: 0,
-                    targetVortex: 0, vortex: 0,
-                    handX: 0, handY: 0,
-                    autoTimer: 0
-                };
-
-                this.frameCount = 0; this.lastFpsTime = 0;
-
-                this.initDOM();
-                this.initMediaPipe();
-                this.loop();
+                clearTimeout(this.textTimeout);
+                setTimeout(() => {
+                    this.state.mode = 0;
+                    document.getElementById('mode-display').innerText = "التدفق الكوني المتصل";
+                }, 1000);
             }
 
-            initDOM() {
-                document.getElementById('btn-audio').onclick = () => this.audio.toggle();
-                document.getElementById('btn-theme').onclick = () => this.cycleTheme();
-            }
-
-            showStatus(msg) {
-                const el = document.getElementById('overlay-status');
-                el.innerText = msg; el.style.opacity = 1;
-                clearTimeout(this.statusTime);
-                this.statusTime = setTimeout(() => el.style.opacity = 0, 1000);
-            }
-
-            cycleTheme() {
-                this.state.theme = (this.state.theme + 1) % CONFIG.themes.length;
-                const t = CONFIG.themes[this.state.theme];
-                this.sys.material.uniforms.uColor1.value.setHex(t.c1);
-                this.sys.material.uniforms.uColor2.value.setHex(t.c2);
-                document.documentElement.style.setProperty('--primary', t.root1);
-                document.documentElement.style.setProperty('--secondary', t.root2);
-                document.getElementById('theme-status').innerText = t.name;
-                this.showStatus(t.name);
-            }
-
-            switchShape(dir) {
-                this.state.shape = (this.state.shape + dir + CONFIG.shapes.length) % CONFIG.shapes.length;
-                this.sys.velUniforms.uShape.value = this.state.shape;
-                this.showStatus(CONFIG.shapes[this.state.shape]);
-            }
-
-            async initMediaPipe() {
+            initMediaPipe() {
                 const video = document.getElementById('video');
                 const hands = new Hands({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
-                hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
-                hands.onResults(this.onHand.bind(this));
+                hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.6 });
+                hands.onResults((res) => {
+                    if (res.multiHandLandmarks?.length > 0) {
+                        let lm = res.multiHandLandmarks[0];
+                        // Map hand to 3D space
+                        this.state.handPos.set((lm[9].x - 0.5) * 50, -(lm[9].y - 0.5) * 50, 0);
 
+                        // Fist check
+                        let open = 0;
+                        for (let tip of [8, 12, 16, 20]) if (lm[tip].y < lm[tip - 2].y) open++;
+                        this.state.handForce = (open === 0) ? -5.0 : 1.0; // Repel if fist, attract if open
+                    } else {
+                        this.state.handForce = 0.0;
+                    }
+                });
+
+                // Ignore camera init failure gracefully
                 try {
-                    const cam = new Camera(video, { onFrame: async () => await hands.send({ image: video }), width: 640, height: 480 });
-                    await cam.start();
-                    this.onLoadComplete();
-                } catch (e) {
-                    document.getElementById('loader-status').innerText = "CAMERA DENIED - AI MODE ONLY";
-                    setTimeout(() => this.onLoadComplete(), 2000);
-                }
+                    new Camera(video, { onFrame: async () => await hands.send({ image: video }), width: 640, height: 480 }).start();
+                } catch (e) { }
             }
 
-            onLoadComplete() {
-                document.getElementById('loader').style.opacity = 0;
-                setTimeout(() => document.getElementById('loader').style.display = 'none', 1500);
-                document.getElementById('ui-layer').classList.remove('hidden');
-            }
-
-            onHand(res) {
-                if (res.multiHandLandmarks?.length > 0) {
-                    if (this.state.mode !== 'NEURAL LINK') {
-                        this.state.mode = 'NEURAL LINK';
-                        document.getElementById('mode-status').innerText = this.state.mode;
-                        document.getElementById('mode-status').style.color = 'var(--secondary)';
+            initUI() {
+                document.getElementById('btn-cinema').onclick = () => {
+                    const ui = document.getElementById('ui-layer');
+                    ui.classList.toggle('hidden');
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen();
                     }
-                    this.state.autoTimer = performance.now();
-                    const lm = res.multiHandLandmarks[0];
+                };
 
-                    // Coordinates mapping (camera is -Z forward, X right, Y up initially)
-                    this.state.handX = (lm[9].x - 0.5) * 40;
-                    this.state.handY = -(lm[9].y - 0.5) * 40;
+                document.getElementById('btn-export').onclick = () => {
+                    this.renderer.render(this.scene, this.camera); // ensure drawn
+                    const link = document.createElement('a');
+                    link.download = 'AstraCore-Snapshot.png';
+                    link.href = this.renderer.domElement.toDataURL('image/png');
+                    link.click();
+                };
 
-                    // Pinch
-                    let dx = lm[4].x - lm[8].x, dy = lm[4].y - lm[8].y;
-                    this.state.targetPinch = Math.max(0.2, 1 + (0.15 - Math.sqrt(dx * dx + dy * dy)) * 5);
-
-                    // Height -> Hue
-                    this.state.targetHue = lm[0].y;
-
-                    // Fist vs Open Palm
-                    let open = 0;
-                    for (let tip of [8, 12, 16, 20]) if (lm[tip].y < lm[tip - 2].y) open++;
-                    if (open === 0) this.state.targetForce = -20.0; // Explosion
-                    else if (open === 4) this.state.targetForce = 5.0; // Attract
-                    else this.state.targetForce = 0;
-
-                    // Swipe logic
-                    const now = performance.now();
-                    if (!this.lastSwipe) this.lastSwipe = now;
-                    if (now - this.lastSwipe > 1000) {
-                        let swipeV = lm[9].x - (this.lastHX || lm[9].x);
-                        if (Math.abs(swipeV) > 0.05) {
-                            this.switchShape(Math.sign(swipeV));
-                            this.lastSwipe = now;
-                        }
-                    }
-                    this.lastHX = lm[9].x;
-
-                    // Circular / Vortex if hands moving in circle? Simplification: thumb distance to pinky horizontal
-                    let tdist = lm[4].x - lm[20].x;
-                    if (tdist > 0.3) this.state.targetVortex = 1.0; else this.state.targetVortex = 0.0;
-
-                } else {
-                    this.handleAutoMode();
-                }
+                let mediaRecorder, chunks = [];
+                document.getElementById('btn-record').onclick = (e) => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') return;
+                    const stream = this.renderer.domElement.captureStream(60);
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                    mediaRecorder.ondataavailable = ev => chunks.push(ev.data);
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'video/webm' });
+                        chunks = [];
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = 'AstraCore-Record.webm';
+                        a.click();
+                        e.target.innerText = '🔴 تسجيل 30 ثانية';
+                        e.target.style.color = '';
+                    };
+                    mediaRecorder.start();
+                    e.target.innerText = 'يتم التسجيل...';
+                    e.target.style.color = '#ff4444';
+                    setTimeout(() => mediaRecorder.stop(), 30000);
+                };
             }
 
-            handleAutoMode() {
-                if (performance.now() - this.state.autoTimer > 4000) {
-                    if (this.state.mode !== 'AUTO AI') {
-                        this.state.mode = 'AUTO AI';
-                        document.getElementById('mode-status').innerText = this.state.mode;
-                        document.getElementById('mode-status').style.color = '#fff';
-                    }
-                    const t = performance.now() * 0.0005;
-                    this.state.handX = Math.sin(t) * 15;
-                    this.state.handY = Math.cos(t * 1.3) * 10;
-                    this.state.targetPinch = 1.0 + Math.sin(t * 0.5) * 0.2;
-                    this.state.targetForce = Math.sin(t * 2) * 2.0;
-                    this.state.targetHue = (Math.sin(t * 0.2) * 0.5) + 0.5;
-                    this.state.targetVortex = Math.sin(t * 0.3) > 0.5 ? 0.5 : 0;
-
-                    // Auto switch every 15s
-                    if (t % 15 < 0.02) this.switchShape(1);
-                    if ((t + 7.5) % 30 < 0.02) this.cycleTheme();
-                } else {
-                    this.state.targetForce = 0; this.state.targetVortex = 0; this.state.targetPinch = 1.0;
-                }
-            }
-
-            loop() {
-                requestAnimationFrame(() => this.loop());
+            animate() {
+                requestAnimationFrame(() => this.animate());
                 const dt = Math.min(this.clock.getDelta(), 0.1);
                 const time = this.clock.getElapsedTime();
 
-                this.audio.update();
+                // UI Linking
+                this.bloomPass.strength += ((document.getElementById('ctrl-bloom').value / 100) - this.bloomPass.strength) * 0.1;
 
-                // LPF Smoothing
-                this.state.pinch += (this.state.targetPinch - this.state.pinch) * 0.1;
-                this.state.force += (this.state.targetForce - this.state.force) * 0.2;
-                this.state.hue += (this.state.targetHue - this.state.hue) * 0.05;
-                this.state.vortex += (this.state.targetVortex - this.state.vortex) * 0.1;
+                // Audio analysis
+                if (this.audioActive && this.analyser) {
+                    this.analyser.getByteFrequencyData(this.freqData);
+                    let b = 0, m = 0;
+                    for (let i = 0; i < 5; i++) b += this.freqData[i];
+                    for (let i = 20; i < 40; i++) m += this.freqData[i];
+                    let micSens = document.getElementById('ctrl-mic').value / 100;
+                    this.state.audioData.x = (b / 5 / 255) * micSens;
+                    this.state.audioData.y = (m / 20 / 255) * micSens;
 
-                const sysVel = this.sys.velUniforms;
-                sysVel.uHandPos.value.set(this.state.handX, this.state.handY, 0);
-                sysVel.uHandForce.value = this.state.force;
-                sysVel.uPinchScale.value = this.state.pinch;
-                sysVel.uVortex.value = this.state.vortex;
-                sysVel.uAudioData.value.copy(this.audio.data);
-
-                this.sys.material.uniforms.uHueShift.value = this.state.hue;
-                this.sys.material.uniforms.uAudioHigh.value = this.audio.data.z;
-
-                // Subtle Camera Float
-                this.engine.camera.position.x = Math.sin(time * 0.2) * 3;
-                this.engine.camera.position.y = Math.cos(time * 0.15) * 2;
-                this.engine.camera.lookAt(0, 0, 0);
-                this.engine.stars.rotation.y = time * 0.02;
-
-                this.sys.update(dt, time);
-                this.engine.composer.render();
-
-                // FPS
-                this.frameCount++;
-                if (performance.now() - this.lastFpsTime >= 1000) {
-                    document.getElementById('fps-counter').innerText = this.frameCount;
-                    this.frameCount = 0; this.lastFpsTime = performance.now();
+                    // Beat detect -> Auto Explosion
+                    if (this.state.audioData.x > 0.8 && time > this.state.explosionTimer + 0.5) {
+                        // mild bump
+                        this.bloomPass.strength += 1.0;
+                        this.state.explosionTimer = time;
+                        this.particleMat.uniforms.uHueShift.value += 0.5;
+                    }
                 }
+
+                // GPGPU Setup
+                this.velUniforms.uTime.value = time;
+                this.velUniforms.uDelta.value = dt;
+                this.velUniforms.uMode.value = this.state.mode;
+                this.velUniforms.uAudioData.value.copy(this.state.audioData);
+                this.velUniforms.uHand1.value.copy(this.state.handPos);
+                this.velUniforms.uHandForce.value = this.state.handForce;
+
+                this.posVar.material.uniforms.uTime.value = time;
+                this.posVar.material.uniforms.uDelta.value = dt;
+
+                this.gpuCompute.compute();
+                this.particleMat.uniforms.texturePosition.value = this.gpuCompute.getCurrentRenderTarget(this.posVar).texture;
+                this.particleMat.uniforms.textureVelocity.value = this.gpuCompute.getCurrentRenderTarget(this.velVar).texture;
+                this.particleMat.uniforms.uHueShift.value += dt * 0.1; // Slow color cycle
+
+                // Camera breathing
+                this.camera.position.x = Math.sin(time * 0.2) * 2.0;
+                this.camera.position.y = Math.cos(time * 0.1) * 2.0;
+                this.camera.lookAt(0, 0, 0);
+
+                this.composer.render();
+
+                // Track FPS
+                document.getElementById('fps-display').innerText = Math.round(1 / dt) + ' FPS';
             }
         }
 
-        window.onload = () => new AppController();
+        window.onload = () => new CoreEngine();
     </script>
 </body>
 
