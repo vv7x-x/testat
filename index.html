@@ -4,34 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الواجهة الكونية العصبية</title>
+    <title>Neural Command Interface | Visual Brain System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #8a2be2;
-            --secondary: #00ffff;
-            --bg-dark: #020205;
-            --text-main: #ffffff;
-            --font-main: "Tajawal", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            --primary: #00ffff;
+            --secondary: #8a2be2;
+            --danger: #ff003c;
+            --bg: #020205;
+            --text: #e0eaff;
+            --font: 'Tajawal', sans-serif;
         }
 
         body,
         html {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
-            background-color: var(--bg-dark);
-            font-family: var(--font-main);
-            color: var(--text-main);
+            background: var(--bg);
+            font-family: var(--font);
+            color: var(--text);
             user-select: none;
-            -webkit-user-select: none;
         }
 
         canvas {
             display: block;
-            width: 100vw;
-            height: 100vh;
             position: absolute;
             top: 0;
             left: 0;
@@ -42,7 +41,11 @@
             display: none;
         }
 
-        /* Cinematic UI Layer */
+        #text-canvas {
+            display: none;
+        }
+
+        /* UI Layer */
         #ui-layer {
             position: absolute;
             top: 0;
@@ -54,126 +57,203 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 30px;
+            padding: 40px;
             box-sizing: border-box;
             transition: opacity 1s ease;
         }
 
         .hud-panel {
-            background: rgba(10, 5, 20, 0.4);
+            background: rgba(5, 5, 15, 0.4);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(0, 255, 255, 0.1);
             border-radius: 12px;
             padding: 20px;
             pointer-events: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
         }
 
-        .top-bar {
+        .hud-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            transition: background 0.5s;
+        }
+
+        .top-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
         }
 
-        .header-title h1 {
+        .title-box h1 {
             margin: 0;
-            font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(90deg, var(--secondary), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
-            line-height: 1.2;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 15px var(--primary);
         }
 
-        .subtitle {
+        .title-box .subtitle {
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--primary);
+            letter-spacing: 4px;
             margin-top: 5px;
+        }
+
+        .sys-data {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .data-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .data-val {
+            font-size: 1.2rem;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+            font-weight: bold;
+        }
+
+        .data-label {
+            font-size: 0.6rem;
+            color: #888;
+            font-family: var(--font);
             letter-spacing: 1px;
         }
 
-        .controls-container {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .control-group label {
-            font-size: 0.8rem;
-            color: #ccc;
-        }
-
-        .control-group input[type=range] {
-            width: 120px;
-            accent-color: var(--secondary);
-        }
-
-        .bottom-bar {
+        .bottom-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
         }
 
-        .action-buttons {
+        .ai-log {
+            max-width: 400px;
+        }
+
+        .ai-log-title {
+            font-size: 0.7rem;
+            color: var(--primary);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            padding-bottom: 5px;
+        }
+
+        #ai-speech-text {
+            font-size: 1.2rem;
+            font-weight: 300;
+            line-height: 1.5;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            min-height: 2em;
+        }
+
+        #ai-intent {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+
+        .btn-group {
             display: flex;
-            gap: 10px;
-            pointer-events: auto;
+            gap: 15px;
             flex-wrap: wrap;
         }
 
         button {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-family: var(--font-main);
-            font-size: 0.9rem;
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-family: var(--font);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+            text-transform: uppercase;
         }
 
         button:hover,
         button.active {
-            background: rgba(0, 255, 255, 0.15);
-            border-color: var(--secondary);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            background: rgba(0, 255, 255, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
             transform: translateY(-2px);
         }
 
-        /* Loading Screen */
+        /* Loading */
         #loader {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--bg-dark);
+            background: #020205;
             z-index: 100;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            transition: opacity 1s;
         }
 
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+        .core-spinner {
+            width: 80px;
+            height: 80px;
+            border: 2px solid transparent;
             border-radius: 50%;
-            border-top-color: var(--secondary);
-            animation: spin 1s infinite linear;
+            border-top-color: var(--primary);
+            border-bottom-color: var(--secondary);
+            animation: spin 1s linear infinite;
             margin-bottom: 20px;
+        }
+
+        /* Cinematic Title */
+        #cinematic-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 5;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 2s;
+        }
+
+        #cinematic-title h2 {
+            font-size: 4rem;
+            font-weight: 300;
+            letter-spacing: 10px;
+            margin: 0;
+            color: #fff;
+            text-shadow: 0 0 30px var(--primary);
+        }
+
+        #cinematic-title p {
+            font-size: 1rem;
+            color: var(--primary);
+            letter-spacing: 15px;
+            margin-top: 10px;
+            text-transform: uppercase;
         }
 
         @keyframes spin {
@@ -187,205 +267,283 @@
             pointer-events: none !important;
         }
 
-        /* Hidden canvas for text rendering */
-        #text-canvas {
-            display: none;
+        /* Dynamic Theme Colors via CSS vars */
+        body.theme-combat {
+            --primary: #ff003c;
+            --secondary: #ff5500;
+        }
+
+        body.theme-analysis {
+            --primary: #0088ff;
+            --secondary: #00ffff;
+        }
+
+        body.theme-data {
+            --primary: #00ff66;
+            --secondary: #0088ff;
+        }
+
+        body.theme-yahya {
+            --primary: #ffd700;
+            --secondary: #ff00ff;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
     <div id="loader">
-        <div class="spinner"></div>
-        <h2 style="font-weight: 300; letter-spacing: 2px;">يتم تهيئة المحرك الكوني...</h2>
+        <div class="core-spinner"></div>
+        <div style="letter-spacing: 5px; font-weight: 300; font-size: 0.9rem; color: #aaa;">SYSTEM BOOT SEQUENCE</div>
+    </div>
+
+    <div id="cinematic-title">
+        <h2>Neural Command Interface</h2>
+        <p>Arabic AI Visual Brain System</p>
     </div>
 
     <div id="ui-layer" class="hidden">
-        <div class="top-bar">
-            <div class="header-title hud-panel">
-                <h1>الواجهة الكونية العصبية</h1>
-                <div class="subtitle">نظام تفاعلي بالصوت والصورة المعززة</div>
-
-                <div class="controls-container">
-                    <div class="control-group">
-                        <label>قوة الانفجار</label>
-                        <input type="range" id="ctrl-force" min="0" max="100" value="50">
-                    </div>
-                    <div class="control-group">
-                        <label>شدة الوهج (Bloom)</label>
-                        <input type="range" id="ctrl-bloom" min="0" max="300" value="150">
-                    </div>
-                    <div class="control-group">
-                        <label>حساسية الميكروفون</label>
-                        <input type="range" id="ctrl-mic" min="10" max="200" value="100">
-                    </div>
-                </div>
+        <div class="top-row">
+            <div class="title-box hud-panel">
+                <h1>نواة الذكاء البصري</h1>
+                <div class="subtitle">Neural Brain Interface v2.0</div>
             </div>
-            <div class="header-title hud-panel" style="text-align: left;">
-                <div id="fps-display" style="color: var(--secondary); font-size: 1.5rem; font-weight: bold;">60 FPS
-                </div>
-                <div id="mode-display" style="color: #aaa; font-size: 0.8rem;">وضع التكوين الكوني</div>
+            <div class="sys-data hud-panel">
+                <div class="data-item"><span class="data-val" id="fps-val">00</span><span class="data-label">FPS
+                        RATE</span></div>
+                <div class="data-item"><span class="data-val" id="particles-val">262K</span><span
+                        class="data-label">ENTITIES</span></div>
+                <div class="data-item"><span class="data-val" id="mode-val">CALM</span><span class="data-label">SYS
+                        STATE</span></div>
+                <div class="data-item"><span class="data-val" id="audio-val">OFF</span><span class="data-label">MIC
+                        LINK</span></div>
             </div>
         </div>
 
-        <div class="bottom-bar">
-            <div class="hud-panel" style="max-width: 400px; color: #ddd; font-size: 0.85rem; line-height: 1.6;">
-                <strong>التحكم:</strong><br>
-                🎤 فعل الميكروفون وتحدث لتشكيل الحروف بالنجوم.<br>
-                💥 قل <b>"انفجار"</b> أو <b>"قوة"</b> لتدمير النجوم.<br>
-                ✋ استخدم الكاميرا لتحريك النجوم بيدك.<br>
-                👁️ يتم الانتقال بين الأوضاع تلقائياً بصياغة ناعمة.
+        <div class="bottom-row">
+            <div class="ai-log hud-panel">
+                <div class="ai-log-title">LIVE NLP TRANSCRIPT</div>
+                <div id="ai-speech-text">...في انتظار الأوامر الصوتية</div>
+                <div id="ai-intent">INTENT: [NONE] | ENGAGING: FALSE</div>
             </div>
 
-            <div class="action-buttons">
-                <button id="btn-mic">🎙️ تفعيل الميكروفون / الأوامر الصوتية</button>
+            <div class="btn-group">
+                <button id="btn-mic">🎙️ ربط الشبكة العصبية (Mic)</button>
                 <button id="btn-record">🔴 تسجيل 30 ثانية</button>
-                <button id="btn-export">📸 لقطة 4K</button>
-                <button id="btn-cinema">🎬 الوضع السينمائي</button>
+                <button id="btn-screenshot">📸 التقاط 4K</button>
             </div>
         </div>
     </div>
 
-    <!-- For Speech to Particles -->
     <canvas id="text-canvas" width="1024" height="1024"></canvas>
     <video id="video"></video>
 
-    <!-- Dependencies -->
+    <!-- Core Libs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/misc/GPUComputationRenderer.js"></script>
+    <!-- Post Processing -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-
+    <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 
-    <!-- Shaders -->
-    <script type="x-shader/x-fragment" id="compute-position">
-        uniform float uTime;
+    <!-- Custom Shader Pass: Neural Distortion & Chromatic Aberration -->
+    <script>
+        const NeuralDistortionShader = {
+            uniforms: {
+                "tDiffuse": { value: null },
+                "uTime": { value: 0.0 },
+                "uIntensity": { value: 0.0 },
+                "uDistortion": { value: 0.0 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float uTime;
+                uniform float uIntensity;
+                uniform float uDistortion;
+                varying vec2 vUv;
+                void main() {
+                    vec2 uv = vUv;
+                    // Wave distortion when talking/high energy
+                    uv.y += sin(uv.x * 20.0 + uTime * 5.0) * uDistortion * 0.01;
+                    uv.x += cos(uv.y * 20.0 + uTime * 5.0) * uDistortion * 0.01;
+                    
+                    // Chromatic aberration
+                    float caOffset = 0.002 * uIntensity;
+                    float r = texture2D(tDiffuse, uv + vec2(caOffset, 0.0)).r;
+                    float g = texture2D(tDiffuse, uv).g;
+                    float b = texture2D(tDiffuse, uv - vec2(caOffset, 0.0)).b;
+                    
+                    gl_FragColor = vec4(r, g, b, 1.0);
+                }
+            `
+        };
+    </script>
+
+    <!-- GPGPU Compute Shaders -->
+    <script type="x-shader/x-fragment" id="compute-pos">
         uniform float uDelta;
         void main() {
             vec2 uv = gl_FragCoord.xy / resolution.xy;
-            vec4 tmpPos = texture2D(texturePosition, uv);
-            vec3 pos = tmpPos.xyz;
-            vec4 tmpVel = texture2D(textureVelocity, uv);
-            vec3 vel = tmpVel.xyz;
-            
+            vec3 pos = texture2D(texturePosition, uv).xyz;
+            vec3 vel = texture2D(textureVelocity, uv).xyz;
             pos += vel * uDelta;
-            
             gl_FragColor = vec4(pos, 1.0);
         }
     </script>
-
-    <script type="x-shader/x-fragment" id="compute-velocity">
+    <script type="x-shader/x-fragment" id="compute-vel">
         uniform float uTime;
         uniform float uDelta;
-        uniform vec3 uTarget; // Dynamic attractor
-        uniform sampler2D uTextTarget;
-        uniform int uMode; // 0: Flow, 1: Text, 2: Explosion
-        uniform vec3 uAudioData;
-        
+        uniform vec3 uTargetParams; // x: mode (0=sphere, 1=split, 2=text), y: scale, z: energy
+        uniform sampler2D uTextTex;
+        uniform vec3 uAudioData; // x: bass, y: mid, z: speech intensity
         uniform vec3 uHand1;
-        uniform float uHandForce;
+        uniform vec3 uHand2;
+        uniform float uHandDist1;
+        uniform float uHandDist2;
+        uniform int uIntent; // 0: Calm, 1: Combat, 2: Analysis, 3: Data
 
+        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+        float snoise(vec3 v) {
+            const vec2 C = vec2(1.0/6.0, 1.0/3.0); const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+            vec3 i = floor(v + dot(v, C.yyy)); vec3 x0 = v - i + dot(i, C.xxx);
+            vec3 g = step(x0.yzx, x0.xyz); vec3 l = 1.0 - g;
+            vec3 i1 = min(g.xyz, l.zxy); vec3 i2 = max(g.xyz, l.zxy);
+            vec3 x1 = x0 - i1 + C.xxx; vec3 x2 = x0 - i2 + C.yyy; vec3 x3 = x0 - D.yyy;
+            i = mod289(i);
+            vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+            float n_ = 0.142857142857; vec3 ns = n_ * D.wyz - D.xzx;
+            vec4 j = p - 49.0 * floor(p * ns.z * ns.z); vec4 x_ = floor(j * ns.z); vec4 y_ = floor(j - 7.0 * x_);
+            vec4 x = x_*ns.x + ns.yyyy; vec4 y = y_*ns.x + ns.yyyy; vec4 h = 1.0 - abs(x) - abs(y);
+            vec4 b0 = vec4(x.xy, y.xy); vec4 b1 = vec4(x.zw, y.zw);
+            vec4 s0 = floor(b0)*2.0 + 1.0; vec4 s1 = floor(b1)*2.0 + 1.0; vec4 sh = -step(h, vec4(0.0));
+            vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy; vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+            vec3 p0 = vec3(a0.xy,h.x); vec3 p1 = vec3(a0.zw,h.y); vec3 p2 = vec3(a1.xy,h.z); vec3 p3 = vec3(a1.zw,h.w);
+            vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+            p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+            vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+            return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+        }
         vec3 curlNoise(vec3 p) {
-            float n1 = sin(p.y*2.0) + cos(p.z*2.0);
-            float n2 = sin(p.z*2.0) + cos(p.x*2.0);
-            float n3 = sin(p.x*2.0) + cos(p.y*2.0);
-            return vec3(n1, n2, n3);
+            float e = 0.1;
+            float x = snoise(p + vec3(0, e, 0)) - snoise(p - vec3(0, e, 0)) - snoise(p + vec3(0, 0, e)) + snoise(p - vec3(0, 0, e));
+            float y = snoise(p + vec3(0, 0, e)) - snoise(p - vec3(0, 0, e)) - snoise(p + vec3(e, 0, 0)) + snoise(p - vec3(e, 0, 0));
+            float z = snoise(p + vec3(e, 0, 0)) - snoise(p - vec3(e, 0, 0)) - snoise(p + vec3(0, e, 0)) + snoise(p - vec3(0, e, 0));
+            return normalize(vec3(x, y, z));
         }
 
         void main() {
             vec2 uv = gl_FragCoord.xy / resolution.xy;
-            vec4 tmpPos = texture2D(texturePosition, uv);
-            vec3 pos = tmpPos.xyz;
-            vec4 tmpVel = texture2D(textureVelocity, uv);
-            vec3 vel = tmpVel.xyz;
+            vec3 pos = texture2D(texturePosition, uv).xyz;
+            vec3 vel = texture2D(textureVelocity, uv).xyz;
 
             vec3 force = vec3(0.0);
+            float mode = uTargetParams.x;
+            float scale = uTargetParams.y;
+            float energy = uTargetParams.z; // Explosion vs attract
 
-            // Shape Logic
-            if (uMode == 0) {
-                // Galaxy Spiral
-                float angle = uv.x * 20.0 + uTime * 0.5;
-                float radius = uv.y * 20.0;
-                vec3 target = vec3(cos(angle)*radius, (uv.y - 0.5)*5.0, sin(angle)*radius);
-                force += (target - pos) * 0.5;
-            } else if (uMode == 1) {
-                // Text Target Shape from Texture
-                vec4 tData = texture2D(uTextTarget, uv);
-                vec3 target = tData.xyz; 
-                // tData.w is 1.0 if part of text
-                if(tData.w > 0.0) {
-                    force += (target - pos) * 2.0;
-                } else {
-                    // Wander gently if not attached
-                    force += curlNoise(pos * 0.1 + uTime * 0.2) * 2.0;
-                    force += (-pos * 0.1); // pull to center
+            // Core Shape Dynamics
+            if (mode == 0.0 || mode == 1.0) { 
+                // Brain Core / Split Nodes
+                float r = 10.0 * scale;
+                vec3 target1 = vec3(0.0);
+                vec3 target2 = vec3(0.0);
+                
+                if (mode == 1.0) { // Split Universe (2 hands)
+                    target1 = vec3(-15.0, 0.0, 0.0);
+                    target2 = vec3(15.0, 0.0, 0.0);
                 }
-            } else if (uMode == 2) {
-                // Explosion
-                vec3 dir = normalize(pos + vec3(0.001));
-                force += dir * 50.0;
+                
+                // Form shell around targets
+                float a = uv.x * 6.28;
+                float b = uv.y * 3.14;
+                vec3 spherePoint = vec3(sin(b)*cos(a), sin(b)*sin(a), cos(b)) * r;
+                
+                vec3 primeTarget = (mode == 1.0 && uv.x > 0.5) ? target2 : target1;
+                primeTarget += spherePoint;
+                
+                force += (primeTarget - pos) * 2.0;
+
+                // Intent specific forces
+                if (uIntent == 1) { // Combat
+                    force += curlNoise(pos * 0.2 + uTime) * 15.0; // Aggressive
+                } else if (uIntent == 2) { // Analysis
+                    force += vec3(0.0, sin(pos.x * 0.5 + uTime) * 5.0, 0.0); // Scanning layers
+                }
+            } else if (mode == 2.0) {
+                // Text Rendering Holographic
+                vec4 tData = texture2D(uTextTex, uv);
+                if (tData.w > 0.5) {
+                    force += (tData.xyz - pos) * 5.0;
+                } else {
+                    force += curlNoise(pos * 0.05 + uTime) * (2.0 + uAudioData.z * 10.0); // Drift
+                    force += -pos * 0.2; // Return to center slightly
+                }
             }
 
-            // Audio Influence (Bass -> Repel/Expand)
-            if(uAudioData.x > 0.6) { // Beat
-                force += normalize(pos) * (uAudioData.x * 20.0);
+            // High Energy Explosion / Chaos
+            if (energy > 1.0) {
+                vec3 expDir = normalize(pos) + curlNoise(pos * 0.1)*0.5;
+                force += expDir * energy * 20.0;
             }
 
-            // Hand Influence
-            vec3 hDir = uHand1 - pos;
-            float hDist = length(hDir);
-            if(hDist < 10.0) {
-                force += normalize(hDir) * (10.0 - hDist) * uHandForce * 2.0;
+            // Audio Influence 
+            if (uAudioData.x > 0.7) { // Bass beat
+                force += normalize(pos) * (uAudioData.x * 25.0);
             }
 
-            // Turbulence
-            force += curlNoise(pos * 0.5 + uTime) * (1.0 + uAudioData.y * 2.0);
+            // Hand Physics
+            vec3 dir1 = uHand1 - pos; float d1 = length(dir1);
+            if (d1 < 15.0) force += normalize(dir1) * (15.0 - d1) * uHandDist1 * 5.0;
+            
+            vec3 dir2 = uHand2 - pos; float d2 = length(dir2);
+            if (d2 < 15.0) force += normalize(dir2) * (15.0 - d2) * uHandDist2 * 5.0;
+
+            // General Turbulence
+            force += curlNoise(pos * 0.5 + uTime) * (1.0 + uAudioData.y * 3.0 + uAudioData.z * 5.0);
 
             vel += force * uDelta;
-            vel *= 0.92; // Friction
+            vel *= 0.90; // Dampening
 
-            float maxSpeed = 30.0;
-            if (length(vel) > maxSpeed) vel = normalize(vel) * maxSpeed;
+            float maxSpeed = (uIntent == 1 || energy > 1.0) ? 50.0 : 25.0;
+            if(length(vel) > maxSpeed) vel = normalize(vel) * maxSpeed;
 
             gl_FragColor = vec4(vel, 1.0);
         }
     </script>
 
     <script type="x-shader/x-vertex" id="render-vs">
-        uniform sampler2D texturePosition;
-        uniform sampler2D textureVelocity;
-        uniform float uHueShift;
-        
+        uniform sampler2D tPos;
+        uniform sampler2D tVel;
+        uniform vec3 uColorA;
+        uniform vec3 uColorB;
         varying vec4 vColor;
-
-        vec3 hueShift(vec3 color, float hue) {
-            const vec3 k = vec3(0.57735, 0.57735, 0.57735);
-            float cosAngle = cos(hue);
-            return vec3(color * cosAngle + cross(k, color) * sin(hue) + k * dot(k, color) * (1.0 - cosAngle));
-        }
-
+        
         void main() {
-            vec4 posData = texture2D(texturePosition, position.xy);
-            vec3 pos = posData.xyz;
-            vec4 velData = texture2D(textureVelocity, position.xy);
+            vec3 pos = texture2D(tPos, position.xy).xyz;
+            vec3 vel = texture2D(tVel, position.xy).xyz;
+            float speed = length(vel);
             
             vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-            gl_PointSize = 6.0 / -mvPosition.z;
+            gl_PointSize = (4.0 + speed * 0.1) / -mvPosition.z;
             gl_Position = projectionMatrix * mvPosition;
-
-            float speed = length(velData.xyz);
-            vec3 color = mix(vec3(0.5, 0.0, 1.0), vec3(0.0, 1.0, 1.0), min(speed * 0.1, 1.0));
-            color = hueShift(color, uHueShift);
-
-            vColor = vec4(color, 0.8 + speed * 0.02);
+            
+            // Mix colors based on speed & position
+            float mixVal = smoothstep(0.0, 20.0, speed) * 0.5 + (sin(pos.y * 0.1) * 0.5 + 0.5);
+            vec3 color = mix(uColorA, uColorB, mixVal);
+            vColor = vec4(color, 0.7 + speed * 0.01);
         }
     </script>
     <script type="x-shader/x-fragment" id="render-fs">
@@ -399,55 +557,115 @@
         }
     </script>
 
-    <!-- App Logic -->
-    <script>
-        const FBO_WIDTH = 512; // 262k
+    <!-- Brain Core & HUD Ring Shaders -->
+    <script type="x-shader/x-vertex" id="brain-vs">
+        varying vec3 vNormal; varying vec3 vPos;
+        void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPos = (modelViewMatrix * vec4(position, 1.0)).xyz;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    </script>
+    <script type="x-shader/x-fragment" id="brain-fs">
+        uniform vec3 color; uniform float intensity; varying vec3 vNormal; varying vec3 vPos;
+        void main() {
+            float rim = 1.0 - max(dot(viewMatrix[2].xyz, vNormal), 0.0);
+            rim = smoothstep(0.5, 1.0, rim);
+            gl_FragColor = vec4(color * rim * intensity * 2.0, rim * 0.8);
+        }
+    </script>
 
-        class CoreEngine {
+    <script>
+        /**
+         * Neural Visual Brain Engine
+         * Combines NLP, Speech API, WebAudio, Three.js GPGPU, and MediaPipe
+         */
+
+        const FBO_WIDTH = 512; // 262,144 particles
+
+        // NLP Intents Mapping
+        const INTENTS = {
+            COMBAT: {
+                keys: ['قتال', 'معركة', 'أحمر', 'دمر', 'هجوم', 'combat'], intentId: 1, theme: 'combat',
+                cA: 0xff003c, cB: 0xff5500, reply: 'تفعيل وضع القتال... الدروع جاهزة'
+            },
+            ANALYSIS: {
+                keys: ['تحليل', 'حلل', 'فحص', 'بيانات', 'نظام', 'analysis'], intentId: 2, theme: 'analysis',
+                cA: 0x0088ff, cB: 0x00ffff, reply: 'بدء تحليل طاقة النواة وعرض استهلاك البيانات'
+            },
+            DATA: {
+                keys: ['مصفوفة', 'خوارزمية', 'أخضر'], intentId: 3, theme: 'data',
+                cA: 0x00ff66, cB: 0x0088ff, reply: 'دمج المصفوفات وتحديث الخوارزمية المركزية'
+            },
+            CALM: {
+                keys: ['هدوء', 'سكون', 'إيقاف', 'طبيعي', 'أزرق', 'calm'], intentId: 0, theme: 'default',
+                cA: 0x00ffff, cB: 0x8a2be2, reply: 'إعادة ضبط الأنظمة لوضع السكون المؤقت'
+            },
+            CINEMATIC: {
+                keys: ['سينمائي', 'عرض', 'تفعيل العرض', 'cinema'], intentId: 0, theme: 'default', action: 'cinema',
+                cA: 0x00ffff, cB: 0x8a2be2, reply: 'تفعيل الواجهة السينمائية الكاملة'
+            },
+            EXPLOSION: {
+                keys: ['انفجار', 'انفجر', 'بوم', 'explode', 'boom'], intentId: 1, action: 'explode',
+                cA: 0xffaa00, cB: 0xff0000, reply: 'تحذير... تفريغ طاقة قصوى'
+            },
+            YAHYA: {
+                keys: ['يحيى', 'يحيي', 'سيدي', 'yahya'], intentId: 0, theme: 'yahya', action: 'easterEgg',
+                cA: 0xffd700, cB: 0xff00ff, reply: 'أهلاً بك يا هندسة، الأنظمة كلها تحت إمرتك'
+            }
+        };
+
+        class AICore {
             constructor() {
-                this.initThree();
+                this.initGraphics();
+                this.initBrainCore();
                 this.initGPGPU();
-                this.initAudio();
                 this.initSpeech();
+                this.initAudio();
                 this.initMediaPipe();
                 this.initUI();
 
                 this.clock = new THREE.Clock();
+                this.state = {
+                    intent: 0, theme: 'default', mode: 0, scale: 1.0, energy: 0.0,
+                    h1: new THREE.Vector3(), h2: new THREE.Vector3(),
+                    hd1: 0, hd2: 0, // hand dist (force)
+                    audioBass: 0, audioMid: 0, speechSync: 0
+                };
+
+                this.nlpTimeout = null;
+
+                // Text rendering canvas
                 this.textCanvas = document.getElementById('text-canvas');
                 this.textCtx = this.textCanvas.getContext('2d');
                 this.textTexture = new THREE.DataTexture(new Float32Array(FBO_WIDTH * FBO_WIDTH * 4), FBO_WIDTH, FBO_WIDTH, THREE.RGBAFormat, THREE.FloatType);
-                this.textTexture.needsUpdate = true;
 
-                this.state = {
-                    mode: 0,
-                    audioData: new THREE.Vector3(),
-                    handPos: new THREE.Vector3(0, 0, 0),
-                    handForce: 1.0,
-                    explosionTimer: 0,
-                    customColor: null
-                };
-
+                document.getElementById('loader').style.opacity = 0;
+                setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.getElementById('ui-layer').classList.remove('hidden'); }, 1000);
                 this.animate();
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('ui-layer').classList.remove('hidden');
             }
 
-            initThree() {
+            // --- GRAPHICS & POST PROCESSING --- //
+            initGraphics() {
                 this.scene = new THREE.Scene();
                 this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.camera.position.z = 30;
+                this.camera.position.z = 40;
 
-                this.renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true }); // needed for export
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
                 this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 document.body.appendChild(this.renderer.domElement);
 
                 this.composer = new THREE.EffectComposer(this.renderer);
-                this.composer.addPass(new THREE.RenderPass(this.scene, this.camera));
+                this.renderPass = new THREE.RenderPass(this.scene, this.camera);
+                this.composer.addPass(this.renderPass);
 
-                this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+                this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 0.4, 0.85);
                 this.composer.addPass(this.bloomPass);
+
+                this.neuralPass = new THREE.ShaderPass(NeuralDistortionShader);
+                this.composer.addPass(this.neuralPass);
 
                 window.addEventListener('resize', () => {
                     this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -457,69 +675,212 @@
                 });
             }
 
-            initGPGPU() {
-                this.gpuCompute = new GPUComputationRenderer(FBO_WIDTH, FBO_WIDTH, this.renderer);
-                const dtPos = this.gpuCompute.createTexture();
-                const dtVel = this.gpuCompute.createTexture();
+            initBrainCore() {
+                this.coreGrp = new THREE.Group();
+                this.scene.add(this.coreGrp);
 
-                // Init positions in space
+                // Central Energy Sphere
+                const geo = new THREE.IcosahedronGeometry(6, 4);
+                this.brainMat = new THREE.ShaderMaterial({
+                    vertexShader: document.getElementById('brain-vs').textContent,
+                    fragmentShader: document.getElementById('brain-fs').textContent,
+                    uniforms: { color: { value: new THREE.Color(0x00ffff) }, intensity: { value: 1.0 } },
+                    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+                });
+                const sphere = new THREE.Mesh(geo, this.brainMat);
+                this.coreGrp.add(sphere);
+
+                // Holographic Rings
+                for (let i = 0; i < 3; i++) {
+                    const rgeo = new THREE.RingGeometry(8 + i * 2, 8.2 + i * 2, 64);
+                    const rmat = new THREE.MeshBasicMaterial({ color: 0x8a2be2, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
+                    const ring = new THREE.Mesh(rgeo, rmat);
+                    ring.rotation.x = Math.random() * Math.PI;
+                    ring.rotation.y = Math.random() * Math.PI;
+                    // Custom user data to animate
+                    ring.userData = { rx: Math.random() * 0.02, ry: Math.random() * 0.02 };
+                    this.coreGrp.add(ring);
+                }
+            }
+
+            // --- GPGPU PARTICLES --- //
+            initGPGPU() {
+                this.gpu = new GPUComputationRenderer(FBO_WIDTH, FBO_WIDTH, this.renderer);
+                const dtPos = this.gpu.createTexture();
+                const dtVel = this.gpu.createTexture();
+
                 const pArr = dtPos.image.data;
                 for (let i = 0; i < pArr.length; i += 4) {
-                    pArr[i] = (Math.random() - 0.5) * 50;
-                    pArr[i + 1] = (Math.random() - 0.5) * 50;
-                    pArr[i + 2] = (Math.random() - 0.5) * 50;
+                    pArr[i] = (Math.random() - 0.5) * 80;
+                    pArr[i + 1] = (Math.random() - 0.5) * 80;
+                    pArr[i + 2] = (Math.random() - 0.5) * 80;
                     pArr[i + 3] = 1.0;
                 }
 
-                this.posVar = this.gpuCompute.addVariable("texturePosition", document.getElementById('compute-position').textContent, dtPos);
-                this.velVar = this.gpuCompute.addVariable("textureVelocity", document.getElementById('compute-velocity').textContent, dtVel);
+                this.posVar = this.gpu.addVariable("texturePosition", document.getElementById('compute-pos').textContent, dtPos);
+                this.velVar = this.gpu.addVariable("textureVelocity", document.getElementById('compute-vel').textContent, dtVel);
 
-                this.gpuCompute.setVariableDependencies(this.posVar, [this.posVar, this.velVar]);
-                this.gpuCompute.setVariableDependencies(this.velVar, [this.posVar, this.velVar]);
+                this.gpu.setVariableDependencies(this.posVar, [this.posVar, this.velVar]);
+                this.gpu.setVariableDependencies(this.velVar, [this.posVar, this.velVar]);
 
-                this.velUniforms = this.velVar.material.uniforms;
-                this.velUniforms.uTime = { value: 0 };
-                this.velUniforms.uDelta = { value: 0 };
-                this.velUniforms.uMode = { value: 0 };
-                this.velUniforms.uAudioData = { value: new THREE.Vector3() };
-                this.velUniforms.uHand1 = { value: new THREE.Vector3() };
-                this.velUniforms.uHandForce = { value: 1.0 };
+                this.velUnif = this.velVar.material.uniforms;
+                this.velUnif.uTime = { value: 0 }; this.velUnif.uDelta = { value: 0 };
+                this.velUnif.uTargetParams = { value: new THREE.Vector3(0, 1, 0) };
+                this.velUnif.uTextTex = { value: this.textTexture };
+                this.velUnif.uAudioData = { value: new THREE.Vector3() };
+                this.velUnif.uHand1 = { value: new THREE.Vector3() };
+                this.velUnif.uHand2 = { value: new THREE.Vector3() };
+                this.velUnif.uHandDist1 = { value: 0 };
+                this.velUnif.uHandDist2 = { value: 0 };
+                this.velUnif.uIntent = { value: 0 };
 
-                // Texture for text target mode
-                this.velUniforms.uTextTarget = { value: this.textTexture };
-
-                this.posVar.material.uniforms.uTime = { value: 0 };
                 this.posVar.material.uniforms.uDelta = { value: 0 };
 
-                this.gpuCompute.init();
+                this.gpu.init();
 
+                // Particle Geometry rendering
                 const geo = new THREE.BufferGeometry();
-                const uvs = new Float32Array(FBO_WIDTH * FBO_WIDTH * 3);
+                const uvs = new Float32Array(FBO_WIDTH * FBO_WIDTH * 2); // Only need XY for lookup
                 let p = 0;
                 for (let i = 0; i < FBO_WIDTH; i++) {
                     for (let j = 0; j < FBO_WIDTH; j++) {
                         uvs[p++] = (i + 0.5) / FBO_WIDTH;
                         uvs[p++] = (j + 0.5) / FBO_WIDTH;
-                        uvs[p++] = 0;
                     }
                 }
-                geo.setAttribute('position', new THREE.BufferAttribute(uvs, 3));
+                geo.setAttribute('position', new THREE.BufferAttribute(uvs, 2));
 
-                this.particleMat = new THREE.ShaderMaterial({
+                this.pMat = new THREE.ShaderMaterial({
                     vertexShader: document.getElementById('render-vs').textContent,
                     fragmentShader: document.getElementById('render-fs').textContent,
                     uniforms: {
-                        texturePosition: { value: null },
-                        textureVelocity: { value: null },
-                        uHueShift: { value: 0 }
+                        tPos: { value: null }, tVel: { value: null },
+                        uColorA: { value: new THREE.Color(INTENTS.CALM.cA) },
+                        uColorB: { value: new THREE.Color(INTENTS.CALM.cB) }
                     },
                     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
                 });
 
-                this.particleMesh = new THREE.Points(geo, this.particleMat);
-                this.scene.add(this.particleMesh);
+                this.points = new THREE.Points(geo, this.pMat);
+                this.scene.add(this.points);
             }
 
+            // --- SPEECH & NLP --- //
+            initSpeech() {
+                window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!window.SpeechRecognition) return;
+
+                this.recog = new window.SpeechRecognition();
+                this.recog.lang = 'ar-EG';
+                this.recog.continuous = true;
+                this.recog.interimResults = true;
+
+                this.synth = window.speechSynthesis;
+
+                this.recog.onresult = (e) => {
+                    let text = '';
+                    for (let i = e.resultIndex; i < e.results.length; ++i) text += e.results[i][0].transcript;
+
+                    document.getElementById('ai-speech-text').innerText = text;
+                    this.state.speechSync = 1.0; // Trigger distortion shader
+
+                    if (e.results[e.results.length - 1].isFinal) {
+                        this.parseIntent(text);
+                        this.renderTextToParticles(text);
+                    }
+                };
+
+                this.recog.onend = () => { if (this.audioActive) this.recog.start(); };
+            }
+
+            parseIntent(text) {
+                let foundIntent = null;
+                for (const key in INTENTS) {
+                    if (INTENTS[key].keys.some(k => text.includes(k))) {
+                        foundIntent = INTENTS[key];
+                        break;
+                    }
+                }
+
+                if (foundIntent) {
+                    document.getElementById('ai-intent').innerText = `INTENT: [${foundIntent.theme.toUpperCase()}] | ENGAGING: TRUE`;
+                    this.state.intent = foundIntent.intentId || 0;
+
+                    // Update Colors & Theme
+                    document.body.className = `theme-${foundIntent.theme}`;
+                    this.pMat.uniforms.uColorA.value.setHex(foundIntent.cA);
+                    this.pMat.uniforms.uColorB.value.setHex(foundIntent.cB);
+                    this.brainMat.uniforms.color.value.setHex(foundIntent.cA);
+
+                    // TTS Reply
+                    if (foundIntent.reply) {
+                        this.speak(foundIntent.reply);
+                    }
+
+                    // Special Actions
+                    if (foundIntent.action === 'cinema') {
+                        document.getElementById('ui-layer').classList.add('hidden');
+                        document.getElementById('cinematic-title').style.opacity = 1;
+                        if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+                    }
+                    if (foundIntent.action === 'explode') {
+                        this.state.energy = 5.0; // High force
+                        this.bloomPass.strength = 3.0;
+                    }
+                    if (foundIntent.action === 'easterEgg') {
+                        this.bloomPass.strength = 4.0; // Mega flash
+                    }
+                }
+            }
+
+            speak(txt) {
+                if (this.synth.speaking) this.synth.cancel();
+                const u = new SpeechSynthesisUtterance(txt);
+                u.lang = 'ar-SA';
+                u.rate = 1.1; u.pitch = 0.8; // robotic feel
+                this.synth.speak(u);
+            }
+
+            renderTextToParticles(text) {
+                this.state.mode = 2; // Text mode
+                this.textCtx.fillStyle = 'black'; this.textCtx.fillRect(0, 0, 1024, 1024);
+                this.textCtx.fillStyle = 'white'; this.textCtx.font = 'bold 120px Tajawal';
+                this.textCtx.textAlign = 'center'; this.textCtx.textBaseline = 'middle';
+
+                // Max length wrap roughly
+                let lines = [];
+                if (text.length > 20) {
+                    lines.push(text.substring(0, text.length / 2));
+                    lines.push(text.substring(text.length / 2));
+                } else lines.push(text);
+
+                lines.forEach((l, i) => this.textCtx.fillText(l, 512, 450 + (i * 140)));
+
+                const imgData = this.textCtx.getImageData(0, 0, 1024, 1024).data;
+                const texData = this.textTexture.image.data;
+
+                let validPixels = [];
+                for (let i = 0; i < imgData.length; i += 4) {
+                    if (imgData[i] > 100) validPixels.push({ x: (i / 4) % 1024, y: Math.floor((i / 4) / 1024) });
+                }
+
+                if (validPixels.length > 0) {
+                    for (let i = 0; i < texData.length; i += 4) {
+                        let rp = validPixels[Math.floor(Math.random() * validPixels.length)];
+                        texData[i] = (rp.x - 512) * 0.06;
+                        texData[i + 1] = -(rp.y - 512) * 0.06;
+                        texData[i + 2] = (Math.random() - 0.5) * 3.0;
+                        texData[i + 3] = 1.0;
+                    }
+                }
+                this.textTexture.needsUpdate = true;
+
+                // Revert to flow
+                clearTimeout(this.nlpTimeout);
+                this.nlpTimeout = setTimeout(() => { this.state.mode = 0; }, 4000);
+            }
+
+            // --- AUDIO ENGINE --- //
             initAudio() {
                 this.audioActive = false;
                 document.getElementById('btn-mic').onclick = async () => {
@@ -532,245 +893,168 @@
                             this.audioCtx.createMediaStreamSource(stream).connect(this.analyser);
                             this.freqData = new Uint8Array(this.analyser.frequencyBinCount);
                             this.audioActive = true;
-                            if (this.recognition) this.recognition.start();
+                            if (this.recog) this.recog.start();
                             document.getElementById('btn-mic').classList.add('active');
-                        } catch (e) { alert("يجب السماح بالصوت لاستخدام هذه الميزة"); }
+                            document.getElementById('audio-val').innerText = 'ON CORE';
+                            this.speak('تم ربط الشبكة العصبية بنجاح');
+                        } catch (e) { alert("Mic required for AI sync"); }
                     } else {
                         if (this.audioActive) {
                             this.audioCtx.suspend(); this.audioActive = false;
-                            if (this.recognition) this.recognition.stop();
+                            if (this.recog) this.recog.stop();
                             document.getElementById('btn-mic').classList.remove('active');
+                            document.getElementById('audio-val').innerText = 'OFF';
                         } else {
                             this.audioCtx.resume(); this.audioActive = true;
-                            if (this.recognition) this.recognition.start();
+                            if (this.recog) this.recog.start();
                             document.getElementById('btn-mic').classList.add('active');
+                            document.getElementById('audio-val').innerText = 'ON CORE';
                         }
                     }
                 };
             }
 
-            initSpeech() {
-                window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (window.SpeechRecognition) {
-                    this.recognition = new window.SpeechRecognition();
-                    this.recognition.lang = 'ar-SA';
-                    this.recognition.continuous = true;
-                    this.recognition.interimResults = true;
-
-                    this.recognition.onresult = (e) => {
-                        let text = '';
-                        for (let i = e.resultIndex; i < e.results.length; ++i) {
-                            text += e.results[i][0].transcript;
-                        }
-
-                        this.processSpokenText(text);
-
-                        // Trigger magic keywords
-                        if (text.includes('انفجار') || text.includes('قوة') || text.includes('explosion')) {
-                            this.triggerExplosion();
-                        }
-
-                        // Personal name Easter Egg (User change requested: "عند نطق اسمي...")
-                        if (text.includes('اسمي') || text.includes('أحمد') || text.includes('محمد') || text.includes('طارق')) { // Add targeted names
-                            this.particleMat.uniforms.uHueShift.value += 1.0; // Flash universe color
-                        }
-                    };
-
-                    this.recognition.onend = () => {
-                        if (this.audioActive) {
-                            try { this.recognition.start(); } catch (err) { }
-                        } else {
-                            this.state.mode = 0; // Back to flow
-                        }
-                    };
-                }
-            }
-
-            processSpokenText(text) {
-                // Render text into canvas to generate particle targets
-                this.state.mode = 1; // Text mode
-                document.getElementById('mode-display').innerText = "وضع تشكيل الحروف";
-
-                this.textCtx.fillStyle = 'black';
-                this.textCtx.fillRect(0, 0, 1024, 1024);
-                this.textCtx.fillStyle = 'white';
-                this.textCtx.font = 'bold 200px Tajawal';
-                this.textCtx.textAlign = 'center';
-                this.textCtx.textBaseline = 'middle';
-
-                // Wrap text if needed, simplifies logic to just center it
-                this.textCtx.fillText(text, 512, 512);
-
-                const imgData = this.textCtx.getImageData(0, 0, 1024, 1024).data;
-                const texData = this.textTexture.image.data;
-
-                // Randomly assign particles to bright text pixels
-                let pIdx = 0;
-                let validPixels = [];
-                for (let i = 0; i < imgData.length; i += 4) {
-                    if (imgData[i] > 100) {
-                        let idx = i / 4;
-                        validPixels.push({ x: (idx % 1024), y: Math.floor(idx / 1024) });
-                    }
-                }
-
-                if (validPixels.length > 0) {
-                    for (let i = 0; i < texData.length; i += 4) {
-                        let rp = validPixels[Math.floor(Math.random() * validPixels.length)];
-                        // Map 1024x1024 to 3D Space (-20 to 20 approx)
-                        texData[i] = (rp.x - 512) * 0.05;
-                        texData[i + 1] = -(rp.y - 512) * 0.05;
-                        texData[i + 2] = (Math.random() - 0.5) * 2.0; // slight Z depth
-                        texData[i + 3] = 1.0; // active flag
-                    }
-                } else {
-                    for (let i = 0; i < texData.length; i += 4) texData[i + 3] = 0.0;
-                }
-
-                this.textTexture.needsUpdate = true;
-
-                // Clear text mode after delay if not speaking
-                clearTimeout(this.textTimeout);
-                this.textTimeout = setTimeout(() => {
-                    this.state.mode = 0;
-                    document.getElementById('mode-display').innerText = "التدفق الكوني المتصل";
-                }, 3000);
-            }
-
-            triggerExplosion() {
-                this.state.mode = 2;
-                document.getElementById('mode-display').innerText = "الانفجار العظيم";
-                let expForce = document.getElementById('ctrl-force').value / 100;
-                this.bloomPass.strength = 3.0 * expForce;
-
-                clearTimeout(this.textTimeout);
-                setTimeout(() => {
-                    this.state.mode = 0;
-                    document.getElementById('mode-display').innerText = "التدفق الكوني المتصل";
-                }, 1000);
-            }
-
+            // --- MEDIA PIPE HANDS --- //
             initMediaPipe() {
                 const video = document.getElementById('video');
                 const hands = new Hands({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
                 hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.6 });
                 hands.onResults((res) => {
-                    if (res.multiHandLandmarks?.length > 0) {
-                        let lm = res.multiHandLandmarks[0];
-                        // Map hand to 3D space
-                        this.state.handPos.set((lm[9].x - 0.5) * 50, -(lm[9].y - 0.5) * 50, 0);
+                    this.state.hd1 = 0; this.state.hd2 = 0;
 
-                        // Fist check
-                        let open = 0;
-                        for (let tip of [8, 12, 16, 20]) if (lm[tip].y < lm[tip - 2].y) open++;
-                        this.state.handForce = (open === 0) ? -5.0 : 1.0; // Repel if fist, attract if open
+                    if (res.multiHandLandmarks?.length > 0) {
+                        let lm1 = res.multiHandLandmarks[0];
+                        this.state.h1.set((lm1[9].x - 0.5) * 60, -(lm1[9].y - 0.5) * 60, 0);
+
+                        // Fist vs Open Palm
+                        let open1 = 0; for (let tip of [8, 12, 16, 20]) if (lm1[tip].y < lm1[tip - 2].y) open1++;
+                        if (open1 === 0) { this.state.hd1 = -5.0; this.state.energy = 2.0; } // Explosion
+                        else { this.state.hd1 = 2.0; this.state.energy = 0.0; } // Attract
+
+                        // Pinch distance
+                        let dx = lm1[4].x - lm1[8].x, dy = lm1[4].y - lm1[8].y;
+                        this.state.scale = Math.max(0.5, 1.0 + (0.1 - Math.sqrt(dx * dx + dy * dy)) * 5.0);
+
+                        if (res.multiHandLandmarks.length > 1) {
+                            this.state.mode = 1; // Split state
+                            let lm2 = res.multiHandLandmarks[1];
+                            this.state.h2.set((lm2[9].x - 0.5) * 60, -(lm2[9].y - 0.5) * 60, 0);
+                            let open2 = 0; for (let tip of [8, 12, 16, 20]) if (lm2[tip].y < lm2[tip - 2].y) open2++;
+                            this.state.hd2 = (open2 === 0) ? -5.0 : 2.0;
+                        } else {
+                            if (this.state.mode === 1) this.state.mode = 0;
+                        }
                     } else {
-                        this.state.handForce = 0.0;
+                        this.state.scale += (1.0 - this.state.scale) * 0.1;
                     }
                 });
 
-                // Ignore camera init failure gracefully
-                try {
-                    new Camera(video, { onFrame: async () => await hands.send({ image: video }), width: 640, height: 480 }).start();
-                } catch (e) { }
+                try { new Camera(video, { onFrame: async () => await hands.send({ image: video }), width: 640, height: 480 }).start(); } catch (e) { }
             }
 
             initUI() {
-                document.getElementById('btn-cinema').onclick = () => {
-                    const ui = document.getElementById('ui-layer');
-                    ui.classList.toggle('hidden');
-                    if (document.documentElement.requestFullscreen) {
-                        document.documentElement.requestFullscreen();
-                    }
-                };
-
-                document.getElementById('btn-export').onclick = () => {
-                    this.renderer.render(this.scene, this.camera); // ensure drawn
+                document.getElementById('btn-screenshot').onclick = () => {
+                    this.renderer.render(this.scene, this.camera);
                     const link = document.createElement('a');
-                    link.download = 'AstraCore-Snapshot.png';
-                    link.href = this.renderer.domElement.toDataURL('image/png');
-                    link.click();
+                    link.download = 'VisualBrain.png'; link.href = this.renderer.domElement.toDataURL(); link.click();
                 };
 
-                let mediaRecorder, chunks = [];
+                let recorder, chunks = [];
                 document.getElementById('btn-record').onclick = (e) => {
-                    if (mediaRecorder && mediaRecorder.state === 'recording') return;
+                    if (recorder && recorder.state === 'recording') return;
                     const stream = this.renderer.domElement.captureStream(60);
-                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-                    mediaRecorder.ondataavailable = ev => chunks.push(ev.data);
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(chunks, { type: 'video/webm' });
-                        chunks = [];
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url; a.download = 'AstraCore-Record.webm';
-                        a.click();
-                        e.target.innerText = '🔴 تسجيل 30 ثانية';
-                        e.target.style.color = '';
+                    recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                    recorder.ondataavailable = ev => chunks.push(ev.data);
+                    recorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: 'video/webm' }); chunks = [];
+                        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'VisualBrain.webm'; a.click();
+                        e.target.innerText = '🔴 تسجيل 30 ثانية'; e.target.style.color = '';
                     };
-                    mediaRecorder.start();
-                    e.target.innerText = 'يتم التسجيل...';
-                    e.target.style.color = '#ff4444';
-                    setTimeout(() => mediaRecorder.stop(), 30000);
+                    recorder.start();
+                    e.target.innerText = '...RECORDING...'; e.target.style.color = 'var(--danger)';
+                    setTimeout(() => recorder.stop(), 30000);
                 };
             }
 
+            // --- RENDER LOOP --- //
             animate() {
                 requestAnimationFrame(() => this.animate());
                 const dt = Math.min(this.clock.getDelta(), 0.1);
                 const time = this.clock.getElapsedTime();
 
-                // UI Linking
-                this.bloomPass.strength += ((document.getElementById('ctrl-bloom').value / 100) - this.bloomPass.strength) * 0.1;
-
-                // Audio analysis
+                // Audio extraction
                 if (this.audioActive && this.analyser) {
                     this.analyser.getByteFrequencyData(this.freqData);
                     let b = 0, m = 0;
                     for (let i = 0; i < 5; i++) b += this.freqData[i];
                     for (let i = 20; i < 40; i++) m += this.freqData[i];
-                    let micSens = document.getElementById('ctrl-mic').value / 100;
-                    this.state.audioData.x = (b / 5 / 255) * micSens;
-                    this.state.audioData.y = (m / 20 / 255) * micSens;
+                    this.state.audioBass += ((b / 5 / 255) - this.state.audioBass) * 0.2;
+                    this.state.audioMid += ((m / 20 / 255) - this.state.audioMid) * 0.2;
 
-                    // Beat detect -> Auto Explosion
-                    if (this.state.audioData.x > 0.8 && time > this.state.explosionTimer + 0.5) {
-                        // mild bump
-                        this.bloomPass.strength += 1.0;
-                        this.state.explosionTimer = time;
-                        this.particleMat.uniforms.uHueShift.value += 0.5;
-                    }
+                    // Brain core reacts to bass
+                    this.brainMat.uniforms.intensity.value = 1.0 + this.state.audioBass * 2.0;
+                    const scaleC = 1.0 + this.state.audioBass * 0.5;
+                    this.coreGrp.children[0].scale.set(scaleC, scaleC, scaleC);
                 }
 
-                // GPGPU Setup
-                this.velUniforms.uTime.value = time;
-                this.velUniforms.uDelta.value = dt;
-                this.velUniforms.uMode.value = this.state.mode;
-                this.velUniforms.uAudioData.value.copy(this.state.audioData);
-                this.velUniforms.uHand1.value.copy(this.state.handPos);
-                this.velUniforms.uHandForce.value = this.state.handForce;
+                // Decay distortion & energy
+                this.state.speechSync *= 0.95;
+                this.state.energy *= 0.95;
+                this.bloomPass.strength += (1.8 - this.bloomPass.strength) * 0.05; // Return to baseline
 
-                this.posVar.material.uniforms.uTime.value = time;
+                // Update Shaders
+                this.neuralPass.uniforms.uTime.value = time;
+                this.neuralPass.uniforms.uIntensity.value = 1.0 + this.state.speechSync * 5.0 + this.state.energy;
+                this.neuralPass.uniforms.uDistortion.value = this.state.speechSync;
+
+                // Rotate Core Rings
+                for (let i = 1; i <= 3; i++) {
+                    let r = this.coreGrp.children[i];
+                    let speedM = (this.state.intent === 2) ? 5.0 : 1.0; // Faster on analysis
+                    r.rotation.x += r.userData.rx * speedM;
+                    r.rotation.y += r.userData.ry * speedM;
+                }
+
+                // GPGPU
+                this.velUnif.uTime.value = time;
+                this.velUnif.uDelta.value = dt;
+                this.velUnif.uTargetParams.value.set(this.state.mode, this.state.scale, this.state.energy);
+                this.velUnif.uAudioData.value.set(this.state.audioBass, this.state.audioMid, this.state.speechSync);
+                this.velUnif.uHand1.value.copy(this.state.h1);
+                this.velUnif.uHand2.value.copy(this.state.h2);
+                this.velUnif.uHandDist1.value = this.state.hd1;
+                this.velUnif.uHandDist2.value = this.state.hd2;
+                this.velUnif.uIntent.value = this.state.intent;
+
                 this.posVar.material.uniforms.uDelta.value = dt;
 
-                this.gpuCompute.compute();
-                this.particleMat.uniforms.texturePosition.value = this.gpuCompute.getCurrentRenderTarget(this.posVar).texture;
-                this.particleMat.uniforms.textureVelocity.value = this.gpuCompute.getCurrentRenderTarget(this.velVar).texture;
-                this.particleMat.uniforms.uHueShift.value += dt * 0.1; // Slow color cycle
+                this.gpu.compute();
+                this.pMat.uniforms.tPos.value = this.gpu.getCurrentRenderTarget(this.posVar).texture;
+                this.pMat.uniforms.tVel.value = this.gpu.getCurrentRenderTarget(this.velVar).texture;
 
-                // Camera breathing
-                this.camera.position.x = Math.sin(time * 0.2) * 2.0;
-                this.camera.position.y = Math.cos(time * 0.1) * 2.0;
-                this.camera.lookAt(0, 0, 0);
+                // Cinematic camera motion
+                if (document.getElementById('ui-layer').classList.contains('hidden')) {
+                    this.camera.position.x = Math.sin(time * 0.1) * 15;
+                    this.camera.position.z = Math.cos(time * 0.1) * 30 + 10;
+                    this.camera.lookAt(0, 0, 0);
+                } else {
+                    this.camera.position.x += (Math.sin(time * 0.5) * 2.0 - this.camera.position.x) * 0.05;
+                    this.camera.position.z += (40 - this.camera.position.z) * 0.05;
+                    this.camera.lookAt(0, 0, 0);
+                }
 
                 this.composer.render();
 
-                // Track FPS
-                document.getElementById('fps-display').innerText = Math.round(1 / dt) + ' FPS';
+                // Update UI data
+                if (Math.random() > 0.9) {
+                    document.getElementById('fps-val').innerText = Math.round(1 / dt);
+                    let mStr = ['CALM', 'SPLIT LINK', 'NEURAL TEXT'][this.state.mode];
+                    document.getElementById('mode-val').innerText = mStr;
+                }
             }
         }
 
-        window.onload = () => new CoreEngine();
+        window.onload = () => new AICore();
     </script>
 </body>
 
