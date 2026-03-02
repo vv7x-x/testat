@@ -270,6 +270,26 @@
             }
         }
 
+        #speech-text {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 0 20px var(--secondary), 0 0 40px var(--primary);
+            pointer-events: none;
+            z-index: 20;
+            text-align: center;
+            max-width: 80%;
+            opacity: 0;
+            transition: opacity 0.5s;
+            letter-spacing: 2px;
+            direction: rtl;
+            /* Arabic support */
+        }
+
         .hidden {
             opacity: 0 !important;
             pointer-events: none !important;
@@ -320,6 +340,8 @@
             </div>
         </div>
     </div>
+
+    <div id="speech-text"></div>
 
     <video id="video"></video>
 
@@ -716,11 +738,42 @@
             constructor() {
                 this.active = false;
                 this.data = new THREE.Vector3(); // bass, mid, high
+                this.initSpeech();
             }
+
+            initSpeech() {
+                window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (window.SpeechRecognition) {
+                    this.recognition = new window.SpeechRecognition();
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'ar-SA'; // Arabic
+
+                    this.recognition.onresult = (event) => {
+                        let text = '';
+                        for (let i = event.resultIndex; i < event.results.length; ++i) {
+                            text += event.results[i][0].transcript;
+                        }
+                        const speechEl = document.getElementById('speech-text');
+                        speechEl.innerText = text;
+                        speechEl.style.opacity = 1;
+                        clearTimeout(this.speechTimeout);
+                        this.speechTimeout = setTimeout(() => { speechEl.style.opacity = 0; }, 4000);
+                    };
+
+                    this.recognition.onend = () => {
+                        if (this.active) {
+                            try { this.recognition.start(); } catch (e) { }
+                        }
+                    };
+                }
+            }
+
             async toggle() {
                 if (this.active) {
                     this.active = false;
                     if (this.ctx) this.ctx.suspend();
+                    if (this.recognition) this.recognition.stop();
                     document.getElementById('btn-audio').classList.remove('active');
                 } else {
                     if (!this.ctx) {
@@ -735,9 +788,13 @@
                     }
                     this.ctx.resume();
                     this.active = true;
+                    if (this.recognition) {
+                        try { this.recognition.start(); } catch (e) { }
+                    }
                     document.getElementById('btn-audio').classList.add('active');
                 }
             }
+
             update() {
                 if (!this.active) {
                     this.data.set(0, 0, 0); return;
