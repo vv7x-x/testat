@@ -4,18 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cosmic AI Particle Engine | AAA Interactive Experience</title>
+    <title>GPGPU Cinematic Particle Engine | TouchDesigner Quality</title>
     <style>
         :root {
-            --primary: #00d2ff;
-            --secondary: #3a7bd5;
-            --accent: #ff007f;
-            --bg-dark: #05050f;
-            --bg-glass: rgba(10, 10, 20, 0.4);
-            --border-glass: rgba(255, 255, 255, 0.05);
+            --primary: #8a2be2;
+            --secondary: #00ffff;
+            --bg-dark: #020205;
             --text-main: #ffffff;
-            --text-muted: #8892b0;
-            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-main: "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
 
         body,
@@ -46,7 +42,7 @@
             display: none;
         }
 
-        /* UI Layer */
+        /* Cinematic UI Layer */
         #ui-layer {
             position: absolute;
             top: 0;
@@ -58,23 +54,22 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 2.5rem;
+            padding: 40px;
             box-sizing: border-box;
-            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 1s ease;
         }
 
-        .glass-panel {
-            background: var(--bg-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 1.5rem;
+        .hud-panel {
+            background: rgba(2, 2, 5, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 24px;
             pointer-events: auto;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
-        /* Top Bar */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -88,51 +83,56 @@
 
         h1 {
             margin: 0;
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 6px;
             text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        h1 span {
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary);
+            transition: color 1s;
         }
 
         .subtitle {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            letter-spacing: 4px;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            color: var(--secondary);
+            text-shadow: 0 0 10px var(--secondary);
+            transition: color 1s;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
             text-transform: uppercase;
             margin-top: 4px;
         }
 
-        .stats-panel {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
-        }
-
-        .stat-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
-            color: var(--primary);
-            text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
-        }
-
-        .stat-label {
-            color: var(--text-muted);
-            font-family: var(--font-main);
-            text-shadow: none;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Bottom Controls */
         .bottom-bar {
             display: flex;
             justify-content: space-between;
@@ -141,56 +141,65 @@
         }
 
         .controls-info {
-            font-size: 0.8rem;
-            line-height: 1.6;
-            color: var(--text-muted);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
             pointer-events: auto;
-            max-width: 300px;
+            max-width: 320px;
+            line-height: 1.8;
+            letter-spacing: 1px;
         }
 
         .controls-info strong {
-            color: var(--text-main);
-            margin-bottom: 8px;
+            color: #fff;
+            margin-bottom: 12px;
             display: block;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.75rem;
+            letter-spacing: 3px;
+            font-size: 0.7rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
         }
 
         .controls-info ul {
             margin: 0;
-            padding-left: 16px;
+            padding-left: 20px;
+            list-style-type: square;
+        }
+
+        .controls-info li::marker {
+            color: var(--primary);
+            transition: color 1s;
         }
 
         .action-buttons {
             display: flex;
-            gap: 12px;
+            gap: 16px;
             pointer-events: auto;
         }
 
         button {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-main);
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 28px;
+            border-radius: 6px;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 3px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(8px);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            backdrop-filter: blur(10px);
         }
 
         button:hover,
         button.active {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--secondary);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
             transform: translateY(-2px);
         }
 
-        /* Loading Screen */
         #loader {
             position: absolute;
             top: 0;
@@ -203,43 +212,44 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 1s ease-in-out;
+            transition: opacity 1.5s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            width: 60px;
+            height: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            margin-bottom: 20px;
+            border-top-color: var(--secondary);
+            border-right-color: var(--primary);
+            animation: spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            margin-bottom: 30px;
         }
 
         .loader-text {
-            font-size: 0.9rem;
-            letter-spacing: 4px;
+            font-size: 0.7rem;
+            letter-spacing: 8px;
             text-transform: uppercase;
-            color: var(--text-muted);
-            animation: pulse-op 2s infinite;
+            color: rgba(255, 255, 255, 0.5);
+            animation: pulse 2s infinite;
         }
 
-        /* Gestures HUD indicator */
-        #gesture-indicator {
+        #overlay-status {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 2rem;
+            font-size: 3rem;
             font-weight: 100;
-            letter-spacing: 8px;
+            letter-spacing: 20px;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.8);
-            text-shadow: 0 0 20px var(--primary);
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 0 40px var(--secondary);
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.5s;
             z-index: 5;
+            text-align: center;
         }
 
         @keyframes spin {
@@ -248,11 +258,11 @@
             }
         }
 
-        @keyframes pulse-op {
+        @keyframes pulse {
 
             0%,
             100% {
-                opacity: 0.5;
+                opacity: 0.4;
             }
 
             50% {
@@ -260,83 +270,62 @@
             }
         }
 
-        .fade-out {
+        .hidden {
             opacity: 0 !important;
             pointer-events: none !important;
-        }
-
-        @media (max-width: 768px) {
-            #ui-layer {
-                padding: 1.5rem;
-            }
-
-            .bottom-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-            }
-
-            .action-buttons {
-                width: 100%;
-                justify-content: space-between;
-            }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Loading Screen -->
     <div id="loader">
         <div class="spinner"></div>
-        <div class="loader-text" id="loader-status">Initializing AI Engine</div>
+        <div class="loader-text" id="loader-status">Booting Neural Core</div>
     </div>
 
-    <!-- Gesture HUD -->
-    <div id="gesture-indicator">NEBULA</div>
+    <div id="overlay-status"></div>
 
-    <!-- Main UI Layer -->
-    <div id="ui-layer" class="fade-out">
+    <div id="ui-layer" class="hidden">
         <div class="top-bar">
-            <div class="header-title glass-panel">
-                <h1>Cosmic Engine</h1>
-                <div class="subtitle">AI Particle Simulation</div>
+            <div class="header-title hud-panel">
+                <h1>Astra<span>Core</span></h1>
+                <div class="subtitle">GPGPU Neural Simulation</div>
             </div>
-            <div class="stats-panel glass-panel">
-                <div class="stat-box"><span class="stat-label">FPS</span><span id="fps-counter">60</span></div>
-                <div class="stat-box"><span class="stat-label">Particles</span><span id="particle-count">100,000</span>
-                </div>
-                <div class="stat-box"><span class="stat-label">Mode</span><span id="mode-status">AI AUTONOMOUS</span>
-                </div>
-                <div class="stat-box"><span class="stat-label">Theme</span><span id="theme-status">NEBULA</span></div>
+            <div class="stats-grid hud-panel">
+                <div class="stat-item"><span class="stat-value" id="fps-counter">00</span><span
+                        class="stat-label">FPS</span></div>
+                <div class="stat-item"><span class="stat-value" id="particle-count">262K</span><span
+                        class="stat-label">Entities</span></div>
+                <div class="stat-item"><span class="stat-value" id="mode-status">AUTO</span><span
+                        class="stat-label">State</span></div>
+                <div class="stat-item"><span class="stat-value" id="theme-status">COSMIC</span><span
+                        class="stat-label">Theme</span></div>
             </div>
         </div>
-
         <div class="bottom-bar">
-            <div class="controls-info glass-panel">
-                <strong>Gesture Controls</strong>
+            <div class="controls-info hud-panel">
+                <strong>Neural Link Gestures</strong>
                 <ul>
-                    <li>Pinch: Expand/Contract</li>
-                    <li>Palm: Interactive Rotate</li>
-                    <li>Swipe L/R: Change Shape</li>
-                    <li>Fist: Explosion/Burst</li>
-                    <li>Height: Shift Color Hue</li>
+                    <li>Pinch: Gravitational Scale</li>
+                    <li>Fist: Kinetic Shockwave</li>
+                    <li>Swipe: Metamorphosis</li>
+                    <li>Palm Open: Attractor Mode</li>
+                    <li>Circular: Vortex Spin</li>
                 </ul>
             </div>
-
             <div class="action-buttons">
-                <button id="btn-audio">Mic Sync (Audio)</button>
-                <button id="btn-theme">Toggle Theme</button>
-                <button id="btn-fullscreen">Fullscreen</button>
+                <button id="btn-audio">Acoustic Link</button>
+                <button id="btn-theme">Cycle Theme</button>
             </div>
         </div>
     </div>
 
-    <video id="video" playsinline></video>
+    <video id="video"></video>
 
     <!-- Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Post Processing -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/misc/GPUComputationRenderer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
@@ -344,145 +333,178 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/VignetteShader.js"></script>
-    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FilmShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 
-    <!-- Shader Definitions -->
-    <script type="x-shader/x-vertex" id="particle-vertexShader">
-        attribute vec3 targetPosHeart;
-        attribute vec3 targetPosFlower;
-        attribute vec3 targetPosSaturn;
-        attribute vec3 targetPosFireworks;
-        attribute vec3 targetPosGalaxy;
-        attribute vec3 targetPosVortex;
-        attribute vec3 randomData; // x: random 0-1, y: size variation, z: phase
-
+    <!-- GPGPU Shaders -->
+    <script type="x-shader/x-fragment" id="compute-position">
         uniform float uTime;
-        uniform float uMorphProgress;
-        uniform int uCurrentShape;
-        uniform int uNextShape;
-        
+        uniform float uDelta;
+        void main() {
+            vec2 uv = gl_FragCoord.xy / resolution.xy;
+            vec4 tmpPos = texture2D(texturePosition, uv);
+            vec3 pos = tmpPos.xyz;
+            vec4 tmpVel = texture2D(textureVelocity, uv);
+            vec3 vel = tmpVel.xyz;
+            float life = tmpPos.w;
+
+            // Apply velocity
+            pos += vel * uDelta * 50.0;
+            
+            // Re-spawn logic
+            life -= uDelta * (0.1 + uv.x * 0.2);
+            if (life <= 0.0) {
+                // Respawn at origin or specific bounds based on shape later, but GPGPU velocity handles the journey
+                // Actually, best to just let it loop smoothly or respawn near center
+                pos = vec3(uv.x * 0.01, uv.y * 0.01, 0.0);
+                life = 1.0;
+            }
+
+            gl_FragColor = vec4(pos, life);
+        }
+    </script>
+
+    <script type="x-shader/x-fragment" id="compute-velocity">
+        uniform float uTime;
+        uniform float uDelta;
+        uniform int uShape;
+        uniform vec3 uAudioData; // x: bass, y: mid, z: high
+        uniform vec3 uHandPos;
+        uniform float uHandForce; // Positive for attract, negative for explosion
         uniform float uPinchScale;
-        uniform float uExplosionForce;
-        uniform vec3 uGravityCenter;
+        uniform float uVortex;
         
-        uniform float uAudioBass;
-        uniform float uAudioMid;
-        uniform float uThemeNoise;
-
-        varying vec3 vColorPhase;
-        varying float vAlpha;
-
         // Simplex 3D Noise function (Ashima Arts)
         vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
         vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
         vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
         vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-        
         float snoise(vec3 v) {
-            const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-            const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-            vec3 i  = floor(v + dot(v, C.yyy) );
-            vec3 x0 = v - i + dot(i, C.xxx) ;
-            vec3 g = step(x0.yzx, x0.xyz);
-            vec3 l = 1.0 - g;
-            vec3 i1 = min( g.xyz, l.zxy );
-            vec3 i2 = max( g.xyz, l.zxy );
-            vec3 x1 = x0 - i1 + C.xxx;
-            vec3 x2 = x0 - i2 + C.yyy;
-            vec3 x3 = x0 - D.yyy;
+            const vec2  C = vec2(1.0/6.0, 1.0/3.0); const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+            vec3 i  = floor(v + dot(v, C.yyy)); vec3 x0 = v - i + dot(i, C.xxx);
+            vec3 g = step(x0.yzx, x0.xyz); vec3 l = 1.0 - g;
+            vec3 i1 = min(g.xyz, l.zxy); vec3 i2 = max(g.xyz, l.zxy);
+            vec3 x1 = x0 - i1 + C.xxx; vec3 x2 = x0 - i2 + C.yyy; vec3 x3 = x0 - D.yyy;
             i = mod289(i);
-            vec4 p = permute( permute( permute(
-                        i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-                    + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-                    + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
-            float n_ = 0.142857142857;
-            vec3  ns = n_ * D.wyz - D.xzx;
-            vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-            vec4 x_ = floor(j * ns.z);
-            vec4 y_ = floor(j - 7.0 * x_ );
-            vec4 x = x_ *ns.x + ns.yyyy;
-            vec4 y = y_ *ns.x + ns.yyyy;
-            vec4 h = 1.0 - abs(x) - abs(y);
-            vec4 b0 = vec4( x.xy, y.xy );
-            vec4 b1 = vec4( x.zw, y.zw );
-            vec4 s0 = floor(b0)*2.0 + 1.0;
-            vec4 s1 = floor(b1)*2.0 + 1.0;
-            vec4 sh = -step(h, vec4(0.0));
-            vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
-            vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
-            vec3 p0 = vec3(a0.xy,h.x);
-            vec3 p1 = vec3(a0.zw,h.y);
-            vec3 p2 = vec3(a1.xy,h.z);
-            vec3 p3 = vec3(a1.zw,h.w);
+            vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+            float n_ = 0.142857142857; vec3  ns = n_ * D.wyz - D.xzx;
+            vec4 j = p - 49.0 * floor(p * ns.z * ns.z); vec4 x_ = floor(j * ns.z); vec4 y_ = floor(j - 7.0 * x_);
+            vec4 x = x_ *ns.x + ns.yyyy; vec4 y = y_ *ns.x + ns.yyyy; vec4 h = 1.0 - abs(x) - abs(y);
+            vec4 b0 = vec4(x.xy, y.xy); vec4 b1 = vec4(x.zw, y.zw);
+            vec4 s0 = floor(b0)*2.0 + 1.0; vec4 s1 = floor(b1)*2.0 + 1.0; vec4 sh = -step(h, vec4(0.0));
+            vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy; vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+            vec3 p0 = vec3(a0.xy,h.x); vec3 p1 = vec3(a0.zw,h.y); vec3 p2 = vec3(a1.xy,h.z); vec3 p3 = vec3(a1.zw,h.w);
             vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
             p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
             vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-            m = m * m;
-            return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+            m = m * m; return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+        }
+        vec3 curlNoise(vec3 p) {
+            float e = 0.1;
+            vec3 dx = vec3(e, 0.0, 0.0); vec3 dy = vec3(0.0, e, 0.0); vec3 dz = vec3(0.0, 0.0, e);
+            vec3 p_x0 = vec3(snoise(p - dx), snoise(p - dx + vec3(12.3, 45.6, 78.9)), snoise(p - dx + vec3(98.7, 65.4, 32.1)));
+            vec3 p_x1 = vec3(snoise(p + dx), snoise(p + dx + vec3(12.3, 45.6, 78.9)), snoise(p + dx + vec3(98.7, 65.4, 32.1)));
+            vec3 p_y0 = vec3(snoise(p - dy), snoise(p - dy + vec3(12.3, 45.6, 78.9)), snoise(p - dy + vec3(98.7, 65.4, 32.1)));
+            vec3 p_y1 = vec3(snoise(p + dy), snoise(p + dy + vec3(12.3, 45.6, 78.9)), snoise(p + dy + vec3(98.7, 65.4, 32.1)));
+            vec3 p_z0 = vec3(snoise(p - dz), snoise(p - dz + vec3(12.3, 45.6, 78.9)), snoise(p - dz + vec3(98.7, 65.4, 32.1)));
+            vec3 p_z1 = vec3(snoise(p + dz), snoise(p + dz + vec3(12.3, 45.6, 78.9)), snoise(p + dz + vec3(98.7, 65.4, 32.1)));
+            float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;
+            float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;
+            float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;
+            const float divisor = 1.0 / (2.0 * e);
+            return normalize(vec3(x , y , z) * divisor);
         }
 
-        vec3 getPosForShape(int shapeIndex) {
-            if (shapeIndex == 0) return position;        // Sphere (base)
-            if (shapeIndex == 1) return targetPosHeart;
-            if (shapeIndex == 2) return targetPosFlower;
-            if (shapeIndex == 3) return targetPosSaturn;
-            if (shapeIndex == 4) return targetPosFireworks;
-            if (shapeIndex == 5) return targetPosGalaxy;
-            if (shapeIndex == 6) return targetPosVortex;
-            return position;
+        vec3 getTargetPos(vec2 uv, float id, float time) {
+            vec3 target = vec3(0.0);
+            float u = uv.x * 2.0 * 3.14159;
+            float v = uv.y * 3.14159;
+            
+            if (uShape == 0) { // Sphere
+                float r = 10.0;
+                target.x = r * sin(v) * cos(u);
+                target.y = r * sin(v) * sin(u);
+                target.z = r * cos(v);
+            } else if (uShape == 1) { // Torus
+                float R = 8.0; float r = 3.0;
+                target.x = (R + r * cos(v)) * cos(u);
+                target.y = (R + r * cos(v)) * sin(u);
+                target.z = r * sin(v);
+            } else if (uShape == 2) { // Galaxy Spiral
+                float spiralT = uv.x * 10.0;
+                float angle = spiralT * 3.14159 + (uv.y > 0.5 ? 3.14159 : 0.0);
+                float radius = spiralT * 2.0;
+                target.x = cos(angle) * radius;
+                target.z = sin(angle) * radius;
+                target.y = (uv.y - 0.5) * (15.0 - radius); // bulge
+            } else if (uShape == 3) { // Neural Web (Organic Noise bounds)
+                target = vec3(cos(u)*8.0, sin(v)*8.0, sin(u)*8.0) + curlNoise(vec3(u, v, time*0.1))*5.0;
+            }
+            return target * uPinchScale * (1.0 + uAudioData.x * 0.2);
         }
 
         void main() {
-            // Cubic easing interpolation for morphing
-            float ease = uMorphProgress; // can apply smoothstep in JS or here
-            
-            vec3 currentP = getPosForShape(uCurrentShape);
-            vec3 nextP = getPosForShape(uNextShape);
-            
-            vec3 morphedPos = mix(currentP, nextP, ease);
-            
-            // Add Organic Noise
-            float noiseT = uTime * 0.5 + randomData.z * 10.0;
-            vec3 noiseOffset = vec3(
-                snoise(vec3(morphedPos.x * 0.5, morphedPos.y * 0.5, noiseT)),
-                snoise(vec3(morphedPos.y * 0.5, morphedPos.z * 0.5, noiseT + 10.0)),
-                snoise(vec3(morphedPos.z * 0.5, morphedPos.x * 0.5, noiseT + 20.0))
-            ) * uThemeNoise * (1.0 + uAudioMid);
+            vec2 uv = gl_FragCoord.xy / resolution.xy;
+            float id = uv.x + uv.y * resolution.x;
+            vec4 tmpPos = texture2D(texturePosition, uv);
+            vec3 pos = tmpPos.xyz;
+            vec4 tmpVel = texture2D(textureVelocity, uv);
+            vec3 vel = tmpVel.xyz;
 
-            morphedPos += noiseOffset;
+            vec3 target = getTargetPos(uv, id, uTime);
+            
+            // Forces
+            vec3 dir = target - pos;
+            float dist = length(dir);
+            vec3 force = normalize(dir) * min(dist, 10.0) * 0.1; // Attraction to shape
 
-            // Explosion Effect
-            if (uExplosionForce > 0.0) {
-                vec3 dir = normalize(morphedPos) + vec3(snoise(morphedPos), snoise(morphedPos.yzx), snoise(morphedPos.zxy))*0.5;
-                morphedPos += dir * uExplosionForce * randomData.y * 5.0;
+            // Curl Noise Turbulence (highly active with mid freq)
+            vec3 turbulence = curlNoise(pos * 0.1 + uTime * 0.2) * (1.0 + uAudioData.y * 3.0);
+            
+            // Hand Physics (Gravitational/Repulsion)
+            vec3 handDir = uHandPos - pos;
+            float handDist = length(handDir);
+            if(handDist < 15.0) {
+                float hForce = (1.0 - (handDist/15.0)) * uHandForce;
+                force += normalize(handDir) * hForce * 5.0;
             }
 
-            // Pinch / Expansion
-            morphedPos *= uPinchScale * (1.0 + uAudioBass * 0.5);
+            // Vortex motion
+            if (uVortex > 0.0) {
+                vec3 vDir = normalize(vec3(-pos.z, 0.0, pos.x)); // tangential
+                force += vDir * uVortex * 2.0;
+            }
 
-            vec4 mvPosition = modelViewMatrix * vec4(morphedPos, 1.0);
-            
-            // Size attenuation
-            gl_PointSize = (20.0 * randomData.y * (1.0 + uAudioMid*2.0)) / -mvPosition.z;
-            gl_Position = projectionMatrix * mvPosition;
+            // Explosion Override
+            if (uHandForce < -5.0) {
+                vec3 expDir = normalize(pos) + turbulence * 0.5;
+                force += expDir * abs(uHandForce);
+            }
 
-            // Pass data to fragment shader
-            vColorPhase = normalize(morphedPos) + randomData.x;
-            
-            // Fade out based on distance or noise
-            vAlpha = smoothstep(0.0, 1.0, 1.0 - (length(mvPosition.xyz)/50.0)) * (0.3 + 0.7*randomData.x);
+            // Integration
+            vel += force * uDelta;
+            vel += turbulence * uDelta * 2.0;
+            vel *= 0.95; // Friction
+
+            // Max velocity cap
+            float speed = length(vel);
+            if(speed > 10.0) vel = normalize(vel) * 10.0;
+
+            gl_FragColor = vec4(vel, 1.0);
         }
     </script>
 
-    <script type="x-shader/x-fragment" id="particle-fragmentShader">
+    <!-- Render Shaders -->
+    <script type="x-shader/x-vertex" id="render-vs">
+        uniform sampler2D texturePosition;
+        uniform sampler2D textureVelocity;
         uniform vec3 uColor1;
         uniform vec3 uColor2;
         uniform float uHueShift;
-        uniform float uTime;
+        uniform float uAudioHigh;
         
-        varying vec3 vColorPhase;
+        varying vec4 vColor;
         varying float vAlpha;
 
         vec3 hueShift(vec3 color, float hue) {
@@ -492,86 +514,102 @@
         }
 
         void main() {
-            // Circular particle
+            vec4 posData = texture2D(texturePosition, position.xy);
+            vec3 pos = posData.xyz;
+            float life = posData.w;
+
+            vec4 velData = texture2D(textureVelocity, position.xy);
+            float speed = length(velData.xyz);
+
+            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+            gl_PointSize = (15.0 + uAudioHigh * 20.0) / -mvPosition.z;
+            gl_Position = projectionMatrix * mvPosition;
+
+            // Coloring based on speed and UV
+            float mixVal = smoothstep(0.0, 5.0, speed);
+            vec3 baseColor = mix(uColor1, uColor2, mixVal + position.x);
+            baseColor = hueShift(baseColor, uHueShift * 6.28);
+            
+            // Life fade
+            vAlpha = smoothstep(0.0, 0.2, life) * smoothstep(1.0, 0.8, life) * 0.8;
+            vColor = vec4(baseColor, 1.0);
+        }
+    </script>
+    <script type="x-shader/x-fragment" id="render-fs">
+        varying vec4 vColor;
+        varying float vAlpha;
+        void main() {
             vec2 cxy = 2.0 * gl_PointCoord - 1.0;
             float r = dot(cxy, cxy);
             if (r > 1.0) discard;
-
-            // Center glow core
-            float core = exp(-r * 4.0);
-
-            // Mix theme colors based on position
-            float mixVal = sin(vColorPhase.x * 2.0 + uTime + vColorPhase.y) * 0.5 + 0.5;
-            vec3 baseColor = mix(uColor1, uColor2, mixVal);
-            
-            // Apply Hand Height Hue Shift
-            baseColor = hueShift(baseColor, uHueShift * 6.28318);
-
-            vec3 distColor = baseColor * core * 1.5;
-
-            gl_FragColor = vec4(distColor, vAlpha * core);
+            float core = exp(-r * 3.0);
+            gl_FragColor = vec4(vColor.rgb * core * 1.5, vAlpha * core);
         }
     </script>
 
     <script>
         /**
-         * AAA Cosmic Particle Engine
-         * Architecture: Single File Module
+         * AAA GPGPU Particle Core
+         * Architecture: TouchDesigner / Unreal Engine Quality
          */
 
+        const FBO_WIDTH = 512; // 512x512 = 262,144 particles
         const CONFIG = {
-            particles: 100000,
-            autoModeTimeout: 5000, // ms
-            morphDuration: 1.5, // seconds
             themes: [
-                { name: 'NEBULA', c1: 0x6a0dad, c2: 0x00d2ff, bg: '#050510', bloom: 1.5, noise: 0.15 },
-                { name: 'CYBERPUNK', c1: 0xff007f, c2: 0x00f3ff, bg: '#080010', bloom: 1.8, noise: 0.2 },
-                { name: 'PLASMA FIRE', c1: 0xff4500, c2: 0xffcc00, bg: '#100500', bloom: 2.0, noise: 0.3 },
-                { name: 'DARK MATTER', c1: 0x222222, c2: 0x7700ff, bg: '#000000', bloom: 1.0, noise: 0.05 },
-                { name: 'ICE CRYSTAL', c1: 0xaaffff, c2: 0x0044ff, bg: '#000510', bloom: 1.2, noise: 0.1 }
+                { name: 'COSMIC', c1: 0x8a2be2, c2: 0x00ffff, root1: '#8a2be2', root2: '#00ffff' },
+                { name: 'PLASMA FIRE', c1: 0xff3300, c2: 0xffaa00, root1: '#ff3300', root2: '#ffaa00' },
+                { name: 'ICE MATTER', c1: 0xccffff, c2: 0x0044ff, root1: '#0044ff', root2: '#ccffff' },
+                { name: 'CYBER NEON', c1: 0xff007f, c2: 0x00ff00, root1: '#ff007f', root2: '#00ff00' }
             ],
-            shapes: ['Sphere', 'Heart', 'Flower', 'Saturn', 'Fireworks', 'Galaxy', 'Vortex']
-        };
-
-        // --- Core Engine Modules --- //
-
-        const Utils = {
-            easeInOutCubic: t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
-            clamp: (val, min, max) => Math.min(Math.max(val, min), max)
+            shapes: ['SPHERE', 'TORUS', 'GALAXY', 'NEURAL']
         };
 
         class RenderingEngine {
             constructor() {
                 this.scene = new THREE.Scene();
-                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.camera.position.z = 15;
+                this.scene.fog = new THREE.FogExp2(0x020205, 0.015);
+                this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.z = 35;
 
                 this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Balance quality/perf
                 this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                this.renderer.toneMappingExposure = 1.2;
                 document.body.appendChild(this.renderer.domElement);
 
-                this.setupPostProcessing();
-                window.addEventListener('resize', this.onResize.bind(this));
-            }
-
-            setupPostProcessing() {
                 this.composer = new THREE.EffectComposer(this.renderer);
-                this.renderPass = new THREE.RenderPass(this.scene, this.camera);
-                this.composer.addPass(this.renderPass);
+                this.composer.addPass(new THREE.RenderPass(this.scene, this.camera));
 
-                this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-                this.bloomPass.threshold = 0.1;
-                this.bloomPass.strength = 1.5;
-                this.bloomPass.radius = 0.8;
+                this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 2.0, 0.5, 0.8);
                 this.composer.addPass(this.bloomPass);
 
-                // Add Vignette
-                const vignettePass = new THREE.ShaderPass(THREE.VignetteShader);
-                vignettePass.uniforms["offset"].value = 1.0;
-                vignettePass.uniforms["darkness"].value = 1.5;
-                this.composer.addPass(vignettePass);
+                const vigPass = new THREE.ShaderPass(THREE.VignetteShader);
+                vigPass.uniforms["offset"].value = 1.2;
+                vigPass.uniforms["darkness"].value = 1.5;
+                this.composer.addPass(vigPass);
+
+                const filmPass = new THREE.ShaderPass(THREE.FilmShader);
+                filmPass.uniforms["nIntensity"].value = 0.3; // noise
+                filmPass.uniforms["sIntensity"].value = 0;   // scanlines
+                this.composer.addPass(filmPass);
+
+                window.addEventListener('resize', this.onResize.bind(this));
+
+                // Starfield background
+                this.createStars();
+            }
+
+            createStars() {
+                const geo = new THREE.BufferGeometry();
+                const pos = new Float32Array(2000 * 3);
+                for (let i = 0; i < 6000; i++) {
+                    pos[i] = (Math.random() - 0.5) * 200;
+                }
+                geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+                const mat = new THREE.PointsMaterial({ color: 0x444455, size: 0.1, transparent: true, opacity: 0.4 });
+                this.stars = new THREE.Points(geo, mat);
+                this.scene.add(this.stars);
             }
 
             onResize() {
@@ -580,495 +618,331 @@
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.composer.setSize(window.innerWidth, window.innerHeight);
             }
-
-            render() {
-                this.composer.render();
-            }
         }
 
-        class ParticleSystem {
-            constructor(scene) {
-                this.scene = scene;
-                this.count = CONFIG.particles;
-                this.geometry = new THREE.BufferGeometry();
+        class GPUParticleSystem {
+            constructor(engine) {
+                this.engine = engine;
+                this.gpuCompute = new GPUComputationRenderer(FBO_WIDTH, FBO_WIDTH, engine.renderer);
 
-                this.generateBaseAttributes();
-                this.generateShapeBuffers();
+                const dtPosition = this.gpuCompute.createTexture();
+                const dtVelocity = this.gpuCompute.createTexture();
+                this.fillTextures(dtPosition, dtVelocity);
+
+                this.posVar = this.gpuCompute.addVariable("texturePosition", document.getElementById('compute-position').textContent, dtPosition);
+                this.velVar = this.gpuCompute.addVariable("textureVelocity", document.getElementById('compute-velocity').textContent, dtVelocity);
+
+                this.gpuCompute.setVariableDependencies(this.posVar, [this.posVar, this.velVar]);
+                this.gpuCompute.setVariableDependencies(this.velVar, [this.posVar, this.velVar]);
+
+                this.posUniforms = this.posVar.material.uniforms;
+                this.posUniforms.uTime = { value: 0 };
+                this.posUniforms.uDelta = { value: 0 };
+
+                this.velUniforms = this.velVar.material.uniforms;
+                this.velUniforms.uTime = { value: 0 };
+                this.velUniforms.uDelta = { value: 0 };
+                this.velUniforms.uShape = { value: 0 };
+                this.velUniforms.uAudioData = { value: new THREE.Vector3() };
+                this.velUniforms.uHandPos = { value: new THREE.Vector3(0, 0, 0) };
+                this.velUniforms.uHandForce = { value: 0 };
+                this.velUniforms.uPinchScale = { value: 1.0 };
+                this.velUniforms.uVortex = { value: 0.0 };
+
+                const error = this.gpuCompute.init();
+                if (error !== null) console.error(error);
+
+                this.initRenderMaterial();
+            }
+
+            fillTextures(posTex, velTex) {
+                const posArr = posTex.image.data;
+                const velArr = velTex.image.data;
+                for (let i = 0; i < posArr.length; i += 4) {
+                    posArr[i] = (Math.random() - 0.5) * 50;
+                    posArr[i + 1] = (Math.random() - 0.5) * 50;
+                    posArr[i + 2] = (Math.random() - 0.5) * 50;
+                    posArr[i + 3] = Math.random(); // life
+
+                    velArr[i] = velArr[i + 1] = velArr[i + 2] = velArr[i + 3] = 0;
+                }
+            }
+
+            initRenderMaterial() {
+                const geometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(FBO_WIDTH * FBO_WIDTH * 3);
+                let p = 0;
+                for (let i = 0; i < FBO_WIDTH; i++) {
+                    for (let j = 0; j < FBO_WIDTH; j++) {
+                        positions[p++] = (i + 0.5) / FBO_WIDTH;
+                        positions[p++] = (j + 0.5) / FBO_WIDTH;
+                        positions[p++] = 0;
+                    }
+                }
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
                 this.material = new THREE.ShaderMaterial({
-                    vertexShader: document.getElementById('particle-vertexShader').textContent,
-                    fragmentShader: document.getElementById('particle-fragmentShader').textContent,
+                    vertexShader: document.getElementById('render-vs').textContent,
+                    fragmentShader: document.getElementById('render-fs').textContent,
                     uniforms: {
-                        uTime: { value: 0 },
-                        uMorphProgress: { value: 0 },
-                        uCurrentShape: { value: 0 },
-                        uNextShape: { value: 0 },
+                        texturePosition: { value: null },
+                        textureVelocity: { value: null },
                         uColor1: { value: new THREE.Color(CONFIG.themes[0].c1) },
                         uColor2: { value: new THREE.Color(CONFIG.themes[0].c2) },
                         uHueShift: { value: 0 },
-                        uPinchScale: { value: 1.0 },
-                        uExplosionForce: { value: 0.0 },
-                        uGravityCenter: { value: new THREE.Vector3(0, 0, 0) },
-                        uAudioBass: { value: 0 },
-                        uAudioMid: { value: 0 },
-                        uThemeNoise: { value: CONFIG.themes[0].noise }
+                        uAudioHigh: { value: 0 }
                     },
-                    transparent: true,
-                    blending: THREE.AdditiveBlending,
-                    depthWrite: false
+                    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
                 });
 
-                this.mesh = new THREE.Points(this.geometry, this.material);
-                this.scene.add(this.mesh);
-
-                this.morphState = {
-                    currentShape: 0,
-                    nextShape: 0,
-                    progress: 0,
-                    isMorphing: false
-                };
+                this.mesh = new THREE.Points(geometry, this.material);
+                this.engine.scene.add(this.mesh);
             }
 
-            generateBaseAttributes() {
-                const pos = new Float32Array(this.count * 3);
-                const randoms = new Float32Array(this.count * 3);
+            update(dt, time) {
+                this.posUniforms.uTime.value = time;
+                this.posUniforms.uDelta.value = dt;
+                this.velUniforms.uTime.value = time;
+                this.velUniforms.uDelta.value = dt;
 
-                for (let i = 0; i < this.count; i++) {
-                    // Sphere Base
-                    let u = Math.random(), v = Math.random();
-                    let theta = u * 2.0 * Math.PI, phi = Math.acos(2.0 * v - 1.0);
-                    let r = Math.cbrt(Math.random()) * 6.0;
-                    pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-                    pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-                    pos[i * 3 + 2] = r * Math.cos(phi);
+                this.gpuCompute.compute();
 
-                    // Randoms (rand, sizeVar, phase)
-                    randoms[i * 3] = Math.random();
-                    randoms[i * 3 + 1] = 0.5 + Math.random() * 1.5;
-                    randoms[i * 3 + 2] = Math.random() * Math.PI * 2;
-                }
-
-                this.geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-                this.geometry.setAttribute('randomData', new THREE.BufferAttribute(randoms, 3));
-            }
-
-            generateShapeBuffers() {
-                const arrHeart = new Float32Array(this.count * 3);
-                const arrFlower = new Float32Array(this.count * 3);
-                const arrSaturn = new Float32Array(this.count * 3);
-                const arrFireworks = new Float32Array(this.count * 3);
-                const arrGalaxy = new Float32Array(this.count * 3);
-                const arrVortex = new Float32Array(this.count * 3);
-
-                for (let i = 0; i < this.count; i++) {
-                    let id3 = i * 3;
-                    let t = Math.random() * Math.PI * 2;
-                    let r;
-
-                    // Heart
-                    let hx = 16 * Math.pow(Math.sin(t), 3) * 0.3;
-                    let hy = (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * 0.3;
-                    let hz = (Math.random() - 0.5) * 2.0;
-                    let spread = Math.random() * 0.8;
-                    let rt = Math.random() * Math.PI * 2;
-                    arrHeart[id3] = hx + Math.cos(rt) * spread;
-                    arrHeart[id3 + 1] = hy + Math.sin(rt) * spread;
-                    arrHeart[id3 + 2] = hz + (Math.random() - 0.5) * spread;
-
-                    // Flower
-                    r = Math.sin(5 * t) * 6.0;
-                    arrFlower[id3] = r * Math.cos(t);
-                    arrFlower[id3 + 1] = r * Math.sin(t);
-                    arrFlower[id3 + 2] = (Math.random() - 0.5) * 1.5;
-                    let distF = Math.sqrt(arrFlower[id3] ** 2 + arrFlower[id3 + 1] ** 2);
-                    let angleF = Math.atan2(arrFlower[id3 + 1], arrFlower[id3]) + distF * 0.3;
-                    arrFlower[id3] = Math.cos(angleF) * distF;
-                    arrFlower[id3 + 1] = Math.sin(angleF) * distF;
-
-                    // Saturn
-                    if (Math.random() > 0.7) { // Core
-                        let su = Math.random(), sv = Math.random();
-                        let stheta = su * 2.0 * Math.PI, sphi = Math.acos(2.0 * sv - 1.0);
-                        let sr = 2.0 * Math.cbrt(Math.random());
-                        arrSaturn[id3] = sr * Math.sin(sphi) * Math.cos(stheta);
-                        arrSaturn[id3 + 1] = sr * Math.sin(sphi) * Math.sin(stheta);
-                        arrSaturn[id3 + 2] = sr * Math.cos(sphi);
-                    } else { // Distinct Rings
-                        r = 3.5 + Math.random() * 4.0;
-                        let ringT = Math.random() * Math.PI * 2;
-                        arrSaturn[id3] = r * Math.cos(ringT);
-                        arrSaturn[id3 + 1] = (Math.random() - 0.5) * 0.2;
-                        arrSaturn[id3 + 2] = r * Math.sin(ringT);
-                        // Tilt
-                        let tilt = 0.4;
-                        let sy = arrSaturn[id3 + 1], sz = arrSaturn[id3 + 2];
-                        arrSaturn[id3 + 1] = sy * Math.cos(tilt) - sz * Math.sin(tilt);
-                        arrSaturn[id3 + 2] = sy * Math.sin(tilt) + sz * Math.cos(tilt);
-                    }
-
-                    // Fireworks (Multi-burst)
-                    let fc = Math.random() * 2 - 1;
-                    let fp = Math.random() * Math.PI * 2;
-                    let ft = Math.acos(fc);
-                    r = Math.random() > 0.9 ? 8 : Math.random() * 3;
-                    arrFireworks[id3] = r * Math.sin(ft) * Math.cos(fp);
-                    arrFireworks[id3 + 1] = (r * Math.sin(ft) * Math.sin(fp)) + (r > 4 ? -Math.random() * 4 : 0); // Trails
-                    arrFireworks[id3 + 2] = r * Math.cos(ft);
-
-                    // Galaxy Spiral
-                    let arms = 3;
-                    let armOffset = Math.random() * Math.PI * 2;
-                    let distG = Math.random() * 10;
-                    let angleG = distG * 1.5 + (Math.floor(Math.random() * arms) * (Math.PI * 2 / arms));
-                    // Add thickness based on distance
-                    let thickG = (10 - distG) * 0.1 * (Math.random() - 0.5);
-                    arrGalaxy[id3] = Math.cos(angleG) * distG + (Math.random() - 0.5);
-                    arrGalaxy[id3 + 1] = thickG * 5.0 + (Math.random() - 0.5) * 0.5;
-                    arrGalaxy[id3 + 2] = Math.sin(angleG) * distG + (Math.random() - 0.5);
-
-                    // Black Hole Vortex
-                    let distV = 1.5 + Math.random() * 10.0;
-                    let angleV = Math.random() * Math.PI * 2 + distV * 2.0;
-                    let yV = (Math.random() - 0.5) * (15.0 - distV); // Funnel shape
-                    arrVortex[id3] = Math.cos(angleV) * distV;
-                    arrVortex[id3 + 1] = yV;
-                    arrVortex[id3 + 2] = Math.sin(angleV) * distV;
-                }
-
-                this.geometry.setAttribute('targetPosHeart', new THREE.BufferAttribute(arrHeart, 3));
-                this.geometry.setAttribute('targetPosFlower', new THREE.BufferAttribute(arrFlower, 3));
-                this.geometry.setAttribute('targetPosSaturn', new THREE.BufferAttribute(arrSaturn, 3));
-                this.geometry.setAttribute('targetPosFireworks', new THREE.BufferAttribute(arrFireworks, 3));
-                this.geometry.setAttribute('targetPosGalaxy', new THREE.BufferAttribute(arrGalaxy, 3));
-                this.geometry.setAttribute('targetPosVortex', new THREE.BufferAttribute(arrVortex, 3));
-            }
-
-            morphTo(shapeIdx) {
-                if (this.morphState.currentShape === shapeIdx || this.morphState.isMorphing) return;
-
-                this.morphState.nextShape = shapeIdx;
-                this.morphState.progress = 0;
-                this.morphState.isMorphing = true;
-
-                this.material.uniforms.uNextShape.value = shapeIdx;
-
-                // UI Update
-                showGestureIndicator(CONFIG.shapes[shapeIdx]);
-            }
-
-            update(dt) {
-                this.material.uniforms.uTime.value += dt;
-
-                if (this.morphState.isMorphing) {
-                    this.morphState.progress += dt / CONFIG.morphDuration;
-                    if (this.morphState.progress >= 1.0) {
-                        this.morphState.currentShape = this.morphState.nextShape;
-                        this.material.uniforms.uCurrentShape.value = this.morphState.currentShape;
-                        this.morphState.progress = 0.0;
-                        this.morphState.isMorphing = false;
-                    }
-                    this.material.uniforms.uMorphProgress.value = Utils.easeInOutCubic(this.morphState.progress);
-                }
+                this.material.uniforms.texturePosition.value = this.gpuCompute.getCurrentRenderTarget(this.posVar).texture;
+                this.material.uniforms.textureVelocity.value = this.gpuCompute.getCurrentRenderTarget(this.velVar).texture;
             }
         }
 
         class AudioEngine {
             constructor() {
-                this.ctx = null;
-                this.analyser = null;
-                this.dataArray = null;
-                this.isActive = false;
-                this.bass = 0;
-                this.mid = 0;
+                this.active = false;
+                this.data = new THREE.Vector3(); // bass, mid, high
             }
-
-            async init() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
-                    const source = this.ctx.createMediaStreamSource(stream);
-                    this.analyser = this.ctx.createAnalyser();
-                    this.analyser.fftSize = 256;
-                    source.connect(this.analyser);
-                    this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-                    this.isActive = true;
-                    document.getElementById('btn-audio').classList.add('active');
-                } catch (e) {
-                    alert("Microphone access denied or unavailable.");
-                }
-            }
-
-            update() {
-                if (!this.isActive) return;
-                this.analyser.getByteFrequencyData(this.dataArray);
-
-                let bSum = 0, mSum = 0;
-                for (let i = 0; i < 5; i++) bSum += this.dataArray[i];
-                for (let i = 20; i < 40; i++) mSum += this.dataArray[i];
-
-                // normalize
-                this.bass = (bSum / 5) / 255.0;
-                this.mid = (mSum / 20) / 255.0;
-            }
-
-            toggle() {
-                if (this.isActive) {
-                    this.isActive = false;
-                    this.bass = 0; this.mid = 0;
+            async toggle() {
+                if (this.active) {
+                    this.active = false;
                     if (this.ctx) this.ctx.suspend();
                     document.getElementById('btn-audio').classList.remove('active');
                 } else {
-                    if (!this.ctx) this.init();
-                    else {
-                        this.ctx.resume();
-                        this.isActive = true;
-                        document.getElementById('btn-audio').classList.add('active');
+                    if (!this.ctx) {
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                            this.analyser = this.ctx.createAnalyser();
+                            this.analyser.fftSize = 256;
+                            this.ctx.createMediaStreamSource(stream).connect(this.analyser);
+                            this.freqData = new Uint8Array(this.analyser.frequencyBinCount);
+                        } catch (e) { alert("Mic required for Acoustic Link"); return; }
                     }
+                    this.ctx.resume();
+                    this.active = true;
+                    document.getElementById('btn-audio').classList.add('active');
                 }
+            }
+            update() {
+                if (!this.active) {
+                    this.data.set(0, 0, 0); return;
+                }
+                this.analyser.getByteFrequencyData(this.freqData);
+                let b = 0, m = 0, h = 0;
+                for (let i = 0; i < 5; i++) b += this.freqData[i];
+                for (let i = 20; i < 40; i++) m += this.freqData[i];
+                for (let i = 80; i < 120; i++) h += this.freqData[i];
+                // Smooth interpolation to avoid judder
+                this.data.x += ((b / 5) / 255.0 - this.data.x) * 0.2;
+                this.data.y += ((m / 20) / 255.0 - this.data.y) * 0.2;
+                this.data.z += ((h / 40) / 255.0 - this.data.z) * 0.2;
             }
         }
 
-        class GestureController {
-            constructor(callbackMap) {
-                this.video = document.getElementById('video');
-                this.callbacks = callbackMap;
+        class AppController {
+            constructor() {
+                this.engine = new RenderingEngine();
+                this.sys = new GPUParticleSystem(this.engine);
+                this.audio = new AudioEngine();
+                this.clock = new THREE.Clock();
 
-                this.lastInteractionTime = Date.now();
-                this.mode = 'AI AUTONOMOUS';
+                this.state = {
+                    mode: 'AUTO', theme: 0, shape: 0,
+                    targetPinch: 1.0, pinch: 1.0,
+                    targetForce: 0, force: 0,
+                    targetHue: 0, hue: 0,
+                    targetVortex: 0, vortex: 0,
+                    handX: 0, handY: 0,
+                    autoTimer: 0
+                };
 
-                // Smoothing caches
-                this.sPinch = 1.0;
-                this.sRotX = 0;
-                this.sRotY = 0;
-                this.sHue = 0;
-                this.sExp = 0;
+                this.frameCount = 0; this.lastFpsTime = 0;
 
-                this.lastSwipeX = 0;
-                this.swipeCooldown = 0;
-
+                this.initDOM();
                 this.initMediaPipe();
+                this.loop();
+            }
+
+            initDOM() {
+                document.getElementById('btn-audio').onclick = () => this.audio.toggle();
+                document.getElementById('btn-theme').onclick = () => this.cycleTheme();
+            }
+
+            showStatus(msg) {
+                const el = document.getElementById('overlay-status');
+                el.innerText = msg; el.style.opacity = 1;
+                clearTimeout(this.statusTime);
+                this.statusTime = setTimeout(() => el.style.opacity = 0, 1000);
+            }
+
+            cycleTheme() {
+                this.state.theme = (this.state.theme + 1) % CONFIG.themes.length;
+                const t = CONFIG.themes[this.state.theme];
+                this.sys.material.uniforms.uColor1.value.setHex(t.c1);
+                this.sys.material.uniforms.uColor2.value.setHex(t.c2);
+                document.documentElement.style.setProperty('--primary', t.root1);
+                document.documentElement.style.setProperty('--secondary', t.root2);
+                document.getElementById('theme-status').innerText = t.name;
+                this.showStatus(t.name);
+            }
+
+            switchShape(dir) {
+                this.state.shape = (this.state.shape + dir + CONFIG.shapes.length) % CONFIG.shapes.length;
+                this.sys.velUniforms.uShape.value = this.state.shape;
+                this.showStatus(CONFIG.shapes[this.state.shape]);
             }
 
             async initMediaPipe() {
-                this.hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
-                this.hands.setOptions({
-                    maxNumHands: 1,
-                    modelComplexity: 1,
-                    minDetectionConfidence: 0.7,
-                    minTrackingConfidence: 0.7
-                });
-                this.hands.onResults(this.onResults.bind(this));
+                const video = document.getElementById('video');
+                const hands = new Hands({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+                hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
+                hands.onResults(this.onHand.bind(this));
 
                 try {
-                    const cameraFeed = new Camera(this.video, {
-                        onFrame: async () => { await this.hands.send({ image: this.video }); },
-                        width: 640, height: 480
-                    });
-                    await cameraFeed.start();
-                    // Hide loader
-                    document.getElementById('loader').style.opacity = '0';
-                    setTimeout(() => document.getElementById('loader').style.display = 'none', 1000);
-                    document.getElementById('ui-layer').classList.remove('fade-out');
+                    const cam = new Camera(video, { onFrame: async () => await hands.send({ image: video }), width: 640, height: 480 });
+                    await cam.start();
+                    this.onLoadComplete();
                 } catch (e) {
-                    document.getElementById('loader-status').innerHTML = "CAMERA DENIED<br>Running Auto Mode";
-                    setTimeout(() => {
-                        document.getElementById('loader').style.opacity = '0';
-                        document.getElementById('ui-layer').classList.remove('fade-out');
-                    }, 2000);
+                    document.getElementById('loader-status').innerText = "CAMERA DENIED - AI MODE ONLY";
+                    setTimeout(() => this.onLoadComplete(), 2000);
                 }
             }
 
-            onResults(results) {
-                const now = Date.now();
+            onLoadComplete() {
+                document.getElementById('loader').style.opacity = 0;
+                setTimeout(() => document.getElementById('loader').style.display = 'none', 1500);
+                document.getElementById('ui-layer').classList.remove('hidden');
+            }
 
-                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                    this.lastInteractionTime = now;
-                    if (this.mode !== 'INTERACTIVE') {
-                        this.mode = 'INTERACTIVE';
-                        document.getElementById('mode-status').innerText = this.mode;
+            onHand(res) {
+                if (res.multiHandLandmarks?.length > 0) {
+                    if (this.state.mode !== 'NEURAL LINK') {
+                        this.state.mode = 'NEURAL LINK';
+                        document.getElementById('mode-status').innerText = this.state.mode;
+                        document.getElementById('mode-status').style.color = 'var(--secondary)';
                     }
+                    this.state.autoTimer = performance.now();
+                    const lm = res.multiHandLandmarks[0];
 
-                    const lm = results.multiHandLandmarks[0];
+                    // Coordinates mapping (camera is -Z forward, X right, Y up initially)
+                    this.state.handX = (lm[9].x - 0.5) * 40;
+                    this.state.handY = -(lm[9].y - 0.5) * 40;
 
-                    // Calculations
-                    let dx = lm[4].x - lm[8].x;
-                    let dy = lm[4].y - lm[8].y;
-                    let dist = Math.sqrt(dx * dx + dy * dy);
-                    let targetPinch = Utils.clamp(1 + (0.2 - dist) * 3, 0.2, 3.0);
+                    // Pinch
+                    let dx = lm[4].x - lm[8].x, dy = lm[4].y - lm[8].y;
+                    this.state.targetPinch = Math.max(0.2, 1 + (0.15 - Math.sqrt(dx * dx + dy * dy)) * 5);
 
-                    let targetRotY = (lm[9].x - 0.5) * Math.PI * 2;
-                    let targetRotX = (lm[9].y - 0.5) * Math.PI;
+                    // Height -> Hue
+                    this.state.targetHue = lm[0].y;
 
-                    let targetHue = lm[0].y; // Hand height
+                    // Fist vs Open Palm
+                    let open = 0;
+                    for (let tip of [8, 12, 16, 20]) if (lm[tip].y < lm[tip - 2].y) open++;
+                    if (open === 0) this.state.targetForce = -20.0; // Explosion
+                    else if (open === 4) this.state.targetForce = 5.0; // Attract
+                    else this.state.targetForce = 0;
 
-                    // Detect Fist (Explosion)
-                    let fingersUp = 0;
-                    for (let tip of [8, 12, 16, 20]) {
-                        if (lm[tip].y < lm[tip - 2].y) fingersUp++;
-                    }
-                    let targetExp = (fingersUp === 0) ? 1.0 : 0.0;
-
-                    // Detect Swipe (change shape)
-                    if (now - this.swipeCooldown > 1500) {
-                        let swipeDx = lm[9].x - this.lastSwipeX;
-                        if (Math.abs(swipeDx) > 0.4) {
-                            this.callbacks.onSwipe(Math.sign(swipeDx));
-                            this.swipeCooldown = now;
+                    // Swipe logic
+                    const now = performance.now();
+                    if (!this.lastSwipe) this.lastSwipe = now;
+                    if (now - this.lastSwipe > 1000) {
+                        let swipeV = lm[9].x - (this.lastHX || lm[9].x);
+                        if (Math.abs(swipeV) > 0.05) {
+                            this.switchShape(Math.sign(swipeV));
+                            this.lastSwipe = now;
                         }
                     }
-                    this.lastSwipeX = lm[9].x;
+                    this.lastHX = lm[9].x;
 
-                    // Apply Smoothing (Low Pass Filter)
-                    this.sPinch += (targetPinch - this.sPinch) * 0.15;
-                    this.sRotX += (targetRotX - this.sRotX) * 0.1;
-                    this.sRotY += (targetRotY - this.sRotY) * 0.1;
-                    this.sHue += (targetHue - this.sHue) * 0.05;
-                    this.sExp += (targetExp - this.sExp) * 0.2;
-
-                    this.callbacks.onUpdate({
-                        pinch: this.sPinch,
-                        rotX: this.sRotX,
-                        rotY: this.sRotY,
-                        hue: this.sHue,
-                        explosion: this.sExp,
-                        isActive: true
-                    });
+                    // Circular / Vortex if hands moving in circle? Simplification: thumb distance to pinky horizontal
+                    let tdist = lm[4].x - lm[20].x;
+                    if (tdist > 0.3) this.state.targetVortex = 1.0; else this.state.targetVortex = 0.0;
 
                 } else {
-                    // Transition back to AI mode if idle
-                    if (now - this.lastInteractionTime > CONFIG.autoModeTimeout) {
-                        if (this.mode !== 'AI AUTONOMOUS') {
-                            this.mode = 'AI AUTONOMOUS';
-                            document.getElementById('mode-status').innerText = this.mode;
-                        }
-                        this.callbacks.onAutoUpdate(now);
-                    } else {
-                        // Smoothly reset specific states when hand disappears suddenly
-                        this.sPinch += (1.0 - this.sPinch) * 0.05;
-                        this.sExp += (0.0 - this.sExp) * 0.1;
-                        this.callbacks.onUpdate({
-                            pinch: this.sPinch,
-                            rotX: this.sRotX,
-                            rotY: this.sRotY,
-                            hue: this.sHue,
-                            explosion: this.sExp,
-                            isActive: false
-                        });
+                    this.handleAutoMode();
+                }
+            }
+
+            handleAutoMode() {
+                if (performance.now() - this.state.autoTimer > 4000) {
+                    if (this.state.mode !== 'AUTO AI') {
+                        this.state.mode = 'AUTO AI';
+                        document.getElementById('mode-status').innerText = this.state.mode;
+                        document.getElementById('mode-status').style.color = '#fff';
                     }
+                    const t = performance.now() * 0.0005;
+                    this.state.handX = Math.sin(t) * 15;
+                    this.state.handY = Math.cos(t * 1.3) * 10;
+                    this.state.targetPinch = 1.0 + Math.sin(t * 0.5) * 0.2;
+                    this.state.targetForce = Math.sin(t * 2) * 2.0;
+                    this.state.targetHue = (Math.sin(t * 0.2) * 0.5) + 0.5;
+                    this.state.targetVortex = Math.sin(t * 0.3) > 0.5 ? 0.5 : 0;
+
+                    // Auto switch every 15s
+                    if (t % 15 < 0.02) this.switchShape(1);
+                    if ((t + 7.5) % 30 < 0.02) this.cycleTheme();
+                } else {
+                    this.state.targetForce = 0; this.state.targetVortex = 0; this.state.targetPinch = 1.0;
+                }
+            }
+
+            loop() {
+                requestAnimationFrame(() => this.loop());
+                const dt = Math.min(this.clock.getDelta(), 0.1);
+                const time = this.clock.getElapsedTime();
+
+                this.audio.update();
+
+                // LPF Smoothing
+                this.state.pinch += (this.state.targetPinch - this.state.pinch) * 0.1;
+                this.state.force += (this.state.targetForce - this.state.force) * 0.2;
+                this.state.hue += (this.state.targetHue - this.state.hue) * 0.05;
+                this.state.vortex += (this.state.targetVortex - this.state.vortex) * 0.1;
+
+                const sysVel = this.sys.velUniforms;
+                sysVel.uHandPos.value.set(this.state.handX, this.state.handY, 0);
+                sysVel.uHandForce.value = this.state.force;
+                sysVel.uPinchScale.value = this.state.pinch;
+                sysVel.uVortex.value = this.state.vortex;
+                sysVel.uAudioData.value.copy(this.audio.data);
+
+                this.sys.material.uniforms.uHueShift.value = this.state.hue;
+                this.sys.material.uniforms.uAudioHigh.value = this.audio.data.z;
+
+                // Subtle Camera Float
+                this.engine.camera.position.x = Math.sin(time * 0.2) * 3;
+                this.engine.camera.position.y = Math.cos(time * 0.15) * 2;
+                this.engine.camera.lookAt(0, 0, 0);
+                this.engine.stars.rotation.y = time * 0.02;
+
+                this.sys.update(dt, time);
+                this.engine.composer.render();
+
+                // FPS
+                this.frameCount++;
+                if (performance.now() - this.lastFpsTime >= 1000) {
+                    document.getElementById('fps-counter').innerText = this.frameCount;
+                    this.frameCount = 0; this.lastFpsTime = performance.now();
                 }
             }
         }
 
-        // --- Main App Coordinator --- //
-        let engine, particles, audio, gestures;
-        let clock = new THREE.Clock();
-        let currentThemeIdx = 0;
-        let pCountEl = document.getElementById('particle-count');
-        let fpsEl = document.getElementById('fps-counter');
-        let frameCount = 0, lastFpsTime = 0;
-        let indicatorEl = document.getElementById('gesture-indicator');
-        let indicatorTimeout;
-
-        function showGestureIndicator(text) {
-            indicatorEl.innerText = text;
-            indicatorEl.style.opacity = 1;
-            clearTimeout(indicatorTimeout);
-            indicatorTimeout = setTimeout(() => { indicatorEl.style.opacity = 0; }, 1500);
-        }
-
-        function toggleTheme() {
-            currentThemeIdx = (currentThemeIdx + 1) % CONFIG.themes.length;
-            const t = CONFIG.themes[currentThemeIdx];
-
-            // Animate transition via JS
-            document.body.style.backgroundColor = t.bg;
-            particles.material.uniforms.uColor1.value.setHex(t.c1);
-            particles.material.uniforms.uColor2.value.setHex(t.c2);
-            particles.material.uniforms.uThemeNoise.value = t.noise;
-            engine.bloomPass.strength = t.bloom;
-
-            document.getElementById('theme-status').innerText = t.name;
-            showGestureIndicator(t.name + " THEME");
-        }
-
-        function init() {
-            engine = new RenderingEngine();
-            particles = new ParticleSystem(engine.scene);
-            audio = new AudioEngine();
-
-            gestures = new GestureController({
-                onSwipe: (dir) => {
-                    let next = particles.morphState.currentShape + dir;
-                    if (next < 0) next = CONFIG.shapes.length - 1;
-                    if (next >= CONFIG.shapes.length) next = 0;
-                    particles.morphTo(next);
-                },
-                onUpdate: (state) => {
-                    particles.mesh.rotation.x = state.rotX;
-                    particles.mesh.rotation.y = state.rotY;
-                    particles.material.uniforms.uPinchScale.value = state.pinch;
-                    particles.material.uniforms.uHueShift.value = state.hue;
-                    particles.material.uniforms.uExplosionForce.value = state.explosion;
-                },
-                onAutoUpdate: (timestamp) => {
-                    // AI Idle Patterns
-                    let t = timestamp * 0.0005;
-                    particles.mesh.rotation.y = t * 0.2;
-                    particles.mesh.rotation.x = Math.sin(t * 0.5) * 0.2;
-                    particles.material.uniforms.uPinchScale.value = 1.0 + Math.sin(t) * 0.1;
-                    particles.material.uniforms.uHueShift.value = (Math.sin(t * 0.1) * 0.5) + 0.5;
-
-                    // Auto switch shape every 10s
-                    if (Math.floor(timestamp / 10000) > Math.floor((timestamp - 16) / 10000)) {
-                        let next = (particles.morphState.currentShape + 1) % CONFIG.shapes.length;
-                        particles.morphTo(next);
-                    }
-                }
-            });
-
-            // Button listeners
-            document.getElementById('btn-audio').addEventListener('click', () => audio.toggle());
-            document.getElementById('btn-theme').addEventListener('click', () => toggleTheme());
-            document.getElementById('btn-fullscreen').addEventListener('click', () => {
-                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                else if (document.exitFullscreen) document.exitFullscreen();
-            });
-
-            pCountEl.innerText = CONFIG.particles.toLocaleString();
-
-            animate();
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            let dt = clock.getDelta();
-
-            audio.update();
-            if (audio.isActive) {
-                particles.material.uniforms.uAudioBass.value = audio.bass;
-                particles.material.uniforms.uAudioMid.value = audio.mid;
-            } else {
-                particles.material.uniforms.uAudioBass.value = 0;
-                particles.material.uniforms.uAudioMid.value = 0;
-            }
-
-            particles.update(dt);
-            engine.render();
-
-            // FPS calculation
-            frameCount++;
-            let now = performance.now();
-            if (now - lastFpsTime >= 1000) {
-                fpsEl.innerText = frameCount;
-                frameCount = 0;
-                lastFpsTime = now;
-            }
-        }
-
-        // Start
-        window.onload = init;
-
+        window.onload = () => new AppController();
     </script>
 </body>
 
