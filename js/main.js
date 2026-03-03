@@ -29,20 +29,46 @@ class AICore {
     }
 
     async loadUIComponents() {
+        // Production-safe UI loader.
+        // Resolves the UI path relative to this module to avoid base-path issues on Vercel/static hosts.
         try {
-            const res = await fetch('components/ui.html');
-            if (!res.ok) throw new Error("Could not load ui.html code: " + res.status);
-            const html = await res.text();
+            const uiUrl = new URL('../components/ui.html', import.meta.url).href;
+            logDebug(`Loading UI from: ${uiUrl}`);
 
+            const res = await fetch(uiUrl, { cache: 'no-store', credentials: 'same-origin' });
+            if (!res.ok) {
+                const sample = await res.text().catch(() => null);
+                logError(`UI Fetch failed: ${res.status} ${res.statusText} - ${uiUrl}`);
+                logDebug('UI fetch response sample:', sample && sample.slice(0, 300));
+                throw new Error(`Failed to fetch UI (${res.status} ${res.statusText})`);
+            }
+
+            const html = await res.text();
+            const uiLayer = document.getElementById('ui-layer');
+            if (!uiLayer) {
+                logError('UI mount point `ui-layer` not found in DOM');
+                throw new Error('ui-layer element not present');
+            }
+
+            uiLayer.innerHTML = html;
+            logDebug('UI fully mounted into DOM.');
+        } catch (err) {
+            // Diagnostic output to help debug production fetch issues
+            logError('loadUIComponents error: ' + (err && err.message ? err.message : err));
+            console.error('AICore.loadUIComponents diagnostics', {
+                error: err,
+                importMeta: import.meta.url,
+                expectedPath: '../components/ui.html',
+                resolvedUrl: (() => { try { return new URL('../components/ui.html', import.meta.url).href; } catch (e) { return null; } })()
+            });
+
+            // graceful fallback: ensure the app doesn't completely break if UI not available
             const uiLayer = document.getElementById('ui-layer');
             if (uiLayer) {
-                uiLayer.innerHTML = html;
-                logDebug("UI fully mounted into DOM.");
-            } else {
-                logError("ui-layer not found in index.html");
+                uiLayer.innerHTML = '<div style="padding:12px;color:#f33;background:#111">UI failed to load. Check /components/ui.html on the server.</div>';
             }
-        } catch (e) {
-            logError("UI Fetch failed: " + e.message);
+            // rethrow so upstream boot can decide to continue or surface error
+            throw err;
         }
     }
 
