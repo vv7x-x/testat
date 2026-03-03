@@ -81,12 +81,19 @@ export class ParticleSystem {
             if (error !== null) { logError(`GPGPU Init Error: ${error}`); return; }
 
             const geo = new THREE.BufferGeometry();
-            const uvs = new Float32Array(FBO_WIDTH * FBO_WIDTH * 2);
+            // Create a 3-component position attribute where x,y encode the UV and z=0.
+            // This avoids THREE computing NaN bounding spheres for 2-component 'position'.
+            const count = FBO_WIDTH * FBO_WIDTH;
+            const posArr = new Float32Array(count * 3);
             let p = 0;
             for (let i = 0; i < FBO_WIDTH; i++) {
-                for (let j = 0; j < FBO_WIDTH; j++) { uvs[p++] = (i + 0.5) / FBO_WIDTH; uvs[p++] = (j + 0.5) / FBO_WIDTH; }
+                for (let j = 0; j < FBO_WIDTH; j++) {
+                    posArr[p++] = (i + 0.5) / FBO_WIDTH; // x -> u
+                    posArr[p++] = (j + 0.5) / FBO_WIDTH; // y -> v
+                    posArr[p++] = 0.0; // z placeholder
+                }
             }
-            geo.setAttribute('position', new THREE.BufferAttribute(uvs, 2));
+            geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
 
             // Draw range control for adaptive particle scaling (use setDrawRange)
             this.fullParticleCount = FBO_WIDTH * FBO_WIDTH;

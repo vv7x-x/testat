@@ -103,7 +103,10 @@ export class Engine {
     // Convenience for external systems to change pixel ratio safely
     setPixelRatio(pr) {
         try {
-            const clamped = Math.max(0.5, Math.min(window.devicePixelRatio || 1.0, pr));
+            const desired = Math.max(0.5, pr);
+            const clamped = Math.min(window.devicePixelRatio || 1.0, desired);
+            const prev = this.renderer.getPixelRatio ? this.renderer.getPixelRatio() : null;
+            if (prev === clamped) return;
             this.renderer.setPixelRatio(clamped);
             // composers need a resize call to pick up DPR changes
             this.onResize();
