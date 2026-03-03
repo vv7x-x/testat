@@ -1,0 +1,37 @@
+:root { --primary: #00ffff; --secondary: #8a2be2; --danger: #ff003c; --bg: #020205; --text: #e0eaff; --font: 'Tajawal', sans-serif; }
+body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: var(--bg); font-family: var(--font); color: var(--text); user-select: none; }
+canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; outline: none; }
+video, #text-canvas { display: none; }
+#ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 40px; box-sizing: border-box; transition: opacity 1s ease; }
+.hud-panel { background: rgba(5, 5, 15, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(0, 255, 255, 0.1); border-radius: 12px; padding: 20px; pointer-events: auto; box-shadow: 0 0 30px rgba(0, 255, 255, 0.05); position: relative; overflow: hidden; }
+.hud-panel::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary); transition: background 0.5s; }
+.top-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.title-box h1 { margin: 0; font-weight: 700; font-size: 1.8rem; letter-spacing: 2px; text-transform: uppercase; color: #fff; text-shadow: 0 0 15px var(--primary); }
+.title-box .subtitle { font-size: 0.8rem; color: var(--primary); letter-spacing: 4px; margin-top: 5px; }
+.sys-data { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-family: 'Courier New', Courier, monospace; }
+.data-item { display: flex; flex-direction: column; align-items: flex-end; }
+.data-val { font-size: 1.2rem; color: var(--primary); text-shadow: 0 0 10px var(--primary); font-weight: bold; }
+.data-label { font-size: 0.6rem; color: #888; font-family: var(--font); letter-spacing: 1px; }
+.bottom-row { display: flex; justify-content: space-between; align-items: flex-end; }
+.ai-log { max-width: 400px; }
+.ai-log-title { font-size: 0.7rem; color: var(--primary); letter-spacing: 2px; margin-bottom: 10px; border-bottom: 1px solid rgba(0,255,255,0.2); padding-bottom: 5px; }
+#ai-speech-text { font-size: 1.2rem; font-weight: 300; line-height: 1.5; text-shadow: 0 0 10px rgba(255,255,255,0.5); min-height: 2em; }
+#ai-intent { font-size: 0.8rem; color: #aaa; margin-top: 10px; font-family: monospace; }
+#debug-log { font-size: 0.7rem; color: #ff3366; margin-top: 10px; max-height: 60px; overflow-y: auto; font-family: monospace; }
+.btn-group { display: flex; gap: 15px; flex-wrap: wrap; }
+button { background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.2); color: var(--text); padding: 12px 24px; border-radius: 4px; font-family: var(--font); font-size: 0.8rem; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; }
+button:hover, button.active { background: rgba(0, 255, 255, 0.2); border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); transform: translateY(-2px); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+#loader { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #020205; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1s; }
+.core-spinner { width: 80px; height: 80px; border: 2px solid transparent; border-radius: 50%; border-top-color: var(--primary); border-bottom-color: var(--secondary); animation: spin 1s linear infinite; margin-bottom: 20px; }
+.loader-text { letter-spacing: 5px; font-weight: 300; font-size: 0.9rem; color: #aaa; }
+.loader-subtext { margin-top:10px; font-size:0.7rem; color:var(--primary); }
+#cinematic-title { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 5; opacity: 0; pointer-events: none; transition: opacity 2s; }
+#cinematic-title h2 { font-size: 4rem; font-weight: 300; letter-spacing: 10px; margin: 0; color: #fff; text-shadow: 0 0 30px var(--primary); }
+#cinematic-title p { font-size: 1rem; color: var(--primary); letter-spacing: 15px; margin-top: 10px; text-transform: uppercase; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.hidden { opacity: 0 !important; pointer-events: none !important; }
+body.theme-combat { --primary: #ff003c; --secondary: #ff5500; }
+body.theme-analysis { --primary: #0088ff; --secondary: #00ffff; }
+body.theme-data { --primary: #00ff66; --secondary: #0088ff; }
+body.theme-yahya { --primary: #ffd700; --secondary: #ff00ff; }
