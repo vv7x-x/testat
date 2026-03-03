@@ -90,20 +90,48 @@ class AICore {
         // Send control logic. It grabs buttons by ID, so they must be in DOM!
         initControls(this.state, this.engine, this.speechSys);
 
-        // Optionally skip MediaPipe if governor disabled it
-        const shouldUseMediaPipe = (this.engine && this.engine.__enableMediaPipe !== false);
-        if (shouldUseMediaPipe) {
-            const handTracking = new HandTracking(this.state);
-            handTracking.load().then(() => {
-                logDebug('MediaPipe Loaded.');
-                handTracking.init();
+        // MediaPipe bootstrap with adaptive fallback instead of hard skip
+        try {
+            const mpCfg = (this.engine && this.engine.__enableMediaPipe) ? this.engine.__enableMediaPipe : { enabled: false };
+            if (!mpCfg.enabled) {
+                logDebug('MediaPipe disabled by PerformanceGovernor config.', mpCfg);
                 this.completeBoot();
-            }).catch(e => {
-                logError('MediaPipe disabled. Proceeding.');
-                this.completeBoot();
-            });
-        } else {
-            logDebug('MediaPipe skipped by PerformanceGovernor.');
+            } else {
+                // initialize with governor-provided settings
+                const createAndInit = async (cfg) => {
+                    const ht = new HandTracking(this.state, {
+                        width: cfg.resolution?.width || 640,
+                        height: cfg.resolution?.height || 480,
+                        maxNumHands: cfg.maxNumHands || 2,
+                        modelComplexity: typeof cfg.modelComplexity === 'number' ? cfg.modelComplexity : 0,
+                        minDetectionConfidence: typeof cfg.minDetectionConfidence === 'number' ? cfg.minDetectionConfidence : 0.5
+                    });
+                    await ht.load();
+                    ht.init();
+                };
+
+                // Attempt primary load
+                createAndInit(mpCfg).then(() => {
+                    logDebug('MediaPipe Loaded with governor settings.', mpCfg);
+                    this.completeBoot();
+                }).catch(async (err) => {
+                    logError('MediaPipe load failed with governor settings: ' + err);
+                    // attempt a conservative fallback once
+                    if (!mpCfg._triedFallback) {
+                        const fallback = Object.assign({}, mpCfg, { resolution: { width: 320, height: 240 }, modelComplexity: 0, _triedFallback: true });
+                        logDebug('Attempting MediaPipe fallback with reduced settings.', fallback);
+                        try {
+                            await createAndInit(fallback);
+                            logDebug('MediaPipe loaded using fallback settings.');
+                        } catch (e) {
+                            logError('MediaPipe fallback also failed: ' + e);
+                        }
+                    }
+                    this.completeBoot();
+                });
+            }
+        } catch (e) {
+            logError('MediaPipe bootstrap error: ' + e);
             this.completeBoot();
         }
 

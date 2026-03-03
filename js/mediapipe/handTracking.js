@@ -1,8 +1,10 @@
 import { logError } from '../core/debug.js';
 
 export class HandTracking {
-    constructor(state) {
+    constructor(state, config = {}) {
         this.state = state;
+        // config: { width, height, maxNumHands, modelComplexity, minDetectionConfidence }
+        this.config = Object.assign({ width: 640, height: 480, maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.6 }, config || {});
     }
     load() {
         return new Promise((resolve, reject) => {
@@ -24,7 +26,7 @@ export class HandTracking {
         const video = document.getElementById('video');
         if (!video) return;
         const hands = new window.Hands({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
-        hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.6 });
+        hands.setOptions({ maxNumHands: this.config.maxNumHands, modelComplexity: this.config.modelComplexity, minDetectionConfidence: this.config.minDetectionConfidence });
         hands.onResults((res) => {
             this.state.hd1 = 0; this.state.hd2 = 0;
             if (res.multiHandLandmarks?.length > 0) {
@@ -45,8 +47,8 @@ export class HandTracking {
             } else { if (!isNaN(this.state.scale)) this.state.scale += (1.0 - this.state.scale) * 0.1; }
         });
         try {
-            const cam = new window.Camera(video, { onFrame: async () => await hands.send({ image: video }), width: 640, height: 480 });
-            cam.start().catch(err => logError("Camera Blocked/Failed: " + err));
-        } catch (e) { logError("Camera API error: " + e); }
+            const cam = new window.Camera(video, { onFrame: async () => await hands.send({ image: video }), width: this.config.width, height: this.config.height });
+            cam.start().catch(err => logError('Camera Blocked/Failed: ' + err));
+        } catch (e) { logError('Camera API error: ' + e); }
     }
 }
