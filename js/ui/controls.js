@@ -29,7 +29,9 @@ export function initControls(state, engine, speechSys) {
 
                 // Exclusively use standard APIs we defined
                 if (speechSys) {
-                    speechSys.startListening();
+                    // Inform speech system that a user gesture occurred (required by browsers)
+                    if (typeof speechSys.markUserGesture === 'function') speechSys.markUserGesture();
+                    speechSys.startListening(true);
                     speechSys.speak('تم ربط الشبكة العصبية بنجاح');
                 }
 
@@ -60,8 +62,8 @@ export function initControls(state, engine, speechSys) {
                     await state.audioCtx.resume();
                     state.audioActive = true;
 
-                    // Resume via Explicit method
-                    if (speechSys) speechSys.startListening();
+                    // Resume via Explicit method (user gesture already present)
+                    if (speechSys) speechSys.startListening(true);
 
                     btnMic.classList.add('active');
                     const audVal = document.getElementById('audio-val');

@@ -33,6 +33,9 @@ export class ParticleSystem {
             if (!sphere.geometry.boundingSphere) sphere.geometry.computeBoundingSphere();
             this.coreGrp.add(sphere);
 
+            // enable bloom layer for brain core if engine exposes bloomLayer
+            try { if (this.engine && typeof this.engine.bloomLayer === 'number') this.coreGrp.traverse(o => { o.layers.enable(this.engine.bloomLayer); }); } catch (e) { }
+
             for (let i = 0; i < 3; i++) {
                 const rgeo = new THREE.RingGeometry(8 + i * 2, 8.2 + i * 2, 64);
                 const rmat = new THREE.MeshBasicMaterial({ color: 0x8a2be2, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
@@ -85,6 +88,14 @@ export class ParticleSystem {
             }
             geo.setAttribute('position', new THREE.BufferAttribute(uvs, 2));
 
+            // Draw range control for adaptive particle scaling (use setDrawRange)
+            this.fullParticleCount = FBO_WIDTH * FBO_WIDTH;
+            this.currentDrawCount = this.fullParticleCount;
+            this.targetDrawCount = this.fullParticleCount;
+            this.minDrawCount = 30000; // never go below 30K
+            this.lastParticleAdjustTime = 0;
+            this.particleAdjustInterval = 1.0; // seconds - only adjust at this cadence
+
             this.pMat = new THREE.ShaderMaterial({
                 vertexShader: renderVsShader, fragmentShader: renderFsShader,
                 uniforms: {
@@ -96,6 +107,8 @@ export class ParticleSystem {
 
             this.points = new THREE.Points(geo, this.pMat);
             this.points.frustumCulled = false;
+            // initially draw all particles
+            this.points.geometry.setDrawRange(0, this.currentDrawCount);
             this.engine.scene.add(this.points);
         } catch (e) { logError("GPGPU Setup error: " + e); }
     }
@@ -117,5 +130,27 @@ export class ParticleSystem {
                 this.pMat.uniforms.tPos.value = posTex; this.pMat.uniforms.tVel.value = velTex;
             }
         }
+        // Adaptive particle draw-range adjustments only once per `particleAdjustInterval`
+        try {
+            if (!this.points) return;
+            const now = time;
+            if ((now - this.lastParticleAdjustTime) >= this.particleAdjustInterval) {
+                this.lastParticleAdjustTime = now;
+                if (this.currentDrawCount !== this.targetDrawCount) {
+                    // smooth step towards target to avoid sudden pops
+                    const delta = Math.sign(this.targetDrawCount - this.currentDrawCount) * Math.max(1, Math.floor(Math.abs(this.targetDrawCount - this.currentDrawCount) * 0.15));
+                    this.currentDrawCount = Math.max(this.minDrawCount, Math.min(this.fullParticleCount, this.currentDrawCount + delta));
+                    this.points.geometry.setDrawRange(0, this.currentDrawCount);
+                }
+            }
+        } catch (e) { logError('Particle drawRange update error: ' + e); }
+    }
+
+    // Called by governor or external systems to request a new maximum particle draw count
+    setMaxDrawCount(maxCount) {
+        try {
+            const clamped = Math.max(this.minDrawCount, Math.min(this.fullParticleCount, Math.floor(maxCount)));
+            this.targetDrawCount = clamped;
+        } catch (e) { logError('setMaxDrawCount error: ' + e); }
     }
 }

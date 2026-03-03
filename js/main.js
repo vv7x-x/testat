@@ -3,6 +3,7 @@ import { initDebug, logDebug, logError, clamp, isValidNumber } from './core/debu
 import { Engine } from './core/engine.js';
 import { ParticleSystem } from './core/particles.js';
 import { SpeechSystem } from './ai/speech.js';
+import { PerformanceGovernor } from './core/performanceGovernor.js';
 import { HandTracking } from './mediapipe/handTracking.js';
 import { initControls } from './ui/controls.js';
 
@@ -50,6 +51,12 @@ class AICore {
         this.engine = new Engine();
         this.particles = new ParticleSystem(this.engine);
 
+        // Boot-time performance governor: detect GPU and apply conservative preset
+        try {
+            this.governor = new PerformanceGovernor(this.engine);
+            this.activePreset = this.governor.applyPreset(this.particles);
+        } catch (e) { /* non-fatal */ }
+
         // At this specific point, loadUIComponents was awaited. 
         // We know for a fact controls exist in the DOM now.
         this.speechSys = new SpeechSystem(this.state, this.engine, this.particles);
@@ -57,17 +64,28 @@ class AICore {
         // Send control logic. It grabs buttons by ID, so they must be in DOM!
         initControls(this.state, this.engine, this.speechSys);
 
-        const handTracking = new HandTracking(this.state);
-        handTracking.load().then(() => {
-            logDebug("MediaPipe Loaded.");
-            handTracking.init();
+        // Optionally skip MediaPipe if governor disabled it
+        const shouldUseMediaPipe = (this.engine && this.engine.__enableMediaPipe !== false);
+        if (shouldUseMediaPipe) {
+            const handTracking = new HandTracking(this.state);
+            handTracking.load().then(() => {
+                logDebug('MediaPipe Loaded.');
+                handTracking.init();
+                this.completeBoot();
+            }).catch(e => {
+                logError('MediaPipe disabled. Proceeding.');
+                this.completeBoot();
+            });
+        } else {
+            logDebug('MediaPipe skipped by PerformanceGovernor.');
             this.completeBoot();
-        }).catch(e => {
-            logError("MediaPipe disabled. Proceeding.");
-            this.completeBoot();
-        });
+        }
 
-        logDebug("Starting Frame Loop.");
+        logDebug('Starting Frame Loop.');
+        // FPS sampler state
+        this._fpsBuffer = new Float32Array(60);
+        this._fpsIdx = 0; this._fpsFilled = false; this._lastFpsSampleTime = performance.now();
+        this._lastPixelRatio = this.engine.renderer.getPixelRatio();
         this.animate();
     }
 
@@ -137,6 +155,45 @@ class AICore {
             }
 
             this.engine.render(time);
+
+            // === Adaptive Dynamic Resolution (FPS sampler & DPR adjustment) ===
+            // record an FPS sample into ring buffer
+            const fps = Math.min(240, 1 / dt);
+            this._fpsBuffer[this._fpsIdx] = fps; this._fpsIdx = (this._fpsIdx + 1) % this._fpsBuffer.length;
+            if (this._fpsIdx === 0) this._fpsFilled = true;
+
+            // sample at most once per second to make decisions
+            const nowMs = performance.now();
+            if ((nowMs - this._lastFpsSampleTime) >= 1000) {
+                this._lastFpsSampleTime = nowMs;
+                // compute average of buffer entries present
+                const count = this._fpsFilled ? this._fpsBuffer.length : this._fpsIdx;
+                let sum = 0; for (let i = 0; i < count; i++) sum += this._fpsBuffer[i] || 0;
+                const avgFPS = (count > 0) ? (sum / count) : (1 / dt);
+
+                // adjust pixel ratio adaptively
+                let pr = this.engine.renderer.getPixelRatio();
+                if (avgFPS < 35 && pr > 0.5) {
+                    pr = Math.max(0.5, pr - 0.1);
+                    this.engine.setPixelRatio(pr);
+                } else if (avgFPS > 55 && pr < (window.devicePixelRatio || 1.0)) {
+                    pr = Math.min(window.devicePixelRatio || 1.0, pr + 0.1);
+                    this.engine.setPixelRatio(pr);
+                }
+
+                // gentle adaptive particle scaling based on fps (requests only)
+                try {
+                    if (this.governor && this.governor.preset && this.particles && typeof this.particles.setMaxDrawCount === 'function') {
+                        const base = this.governor.preset.maxParticles || (512 * 512);
+                        // scale target linearly between min and base
+                        let scaleRatio = Math.min(1.0, avgFPS / 60.0);
+                        // if very low FPS, aggressively reduce
+                        if (avgFPS < 30) scaleRatio *= 0.6;
+                        const newTarget = Math.max(this.particles.minDrawCount || 30000, Math.floor(base * scaleRatio));
+                        this.particles.setMaxDrawCount(newTarget);
+                    }
+                } catch (e) { logError('Adaptive particle scaling failed: ' + e); }
+            }
 
             // UI Rate Limiter
             if (Math.random() > 0.95) {
