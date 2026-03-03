@@ -28,17 +28,33 @@ class AICore {
     }
 
     async loadUIComponents() {
-        // Fetch UI modularly to keep index.html extremely clean
-        const res = await fetch('components/ui.html');
-        if (!res.ok) throw new Error("Could not load ui.html code: " + res.status);
-        const html = await res.text();
-        document.getElementById('ui-layer').innerHTML = html;
+        try {
+            const res = await fetch('components/ui.html');
+            if (!res.ok) throw new Error("Could not load ui.html code: " + res.status);
+            const html = await res.text();
+
+            const uiLayer = document.getElementById('ui-layer');
+            if (uiLayer) {
+                uiLayer.innerHTML = html;
+                logDebug("UI fully mounted into DOM.");
+            } else {
+                logError("ui-layer not found in index.html");
+            }
+        } catch (e) {
+            logError("UI Fetch failed: " + e.message);
+        }
     }
 
     initSystems() {
+        // Ensuring Engine & Particles load blindly first
         this.engine = new Engine();
         this.particles = new ParticleSystem(this.engine);
+
+        // At this specific point, loadUIComponents was awaited. 
+        // We know for a fact controls exist in the DOM now.
         this.speechSys = new SpeechSystem(this.state, this.engine, this.particles);
+
+        // Send control logic. It grabs buttons by ID, so they must be in DOM!
         initControls(this.state, this.engine, this.speechSys);
 
         const handTracking = new HandTracking(this.state);
@@ -46,7 +62,10 @@ class AICore {
             logDebug("MediaPipe Loaded.");
             handTracking.init();
             this.completeBoot();
-        }).catch(e => { logError("MediaPipe disabled.", e); this.completeBoot(); });
+        }).catch(e => {
+            logError("MediaPipe disabled. Proceeding.");
+            this.completeBoot();
+        });
 
         logDebug("Starting Frame Loop.");
         this.animate();
@@ -56,7 +75,11 @@ class AICore {
         const loader = document.getElementById('loader');
         if (loader) {
             loader.style.opacity = '0';
-            setTimeout(() => { loader.style.display = 'none'; document.getElementById('ui-layer')?.classList.remove('hidden'); }, 1000);
+            setTimeout(() => {
+                loader.style.display = 'none';
+                const uiLayer = document.getElementById('ui-layer');
+                if (uiLayer) uiLayer.classList.remove('hidden');
+            }, 1000);
         }
     }
 

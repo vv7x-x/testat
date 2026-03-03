@@ -3,12 +3,11 @@ import { parseIntent } from './nlp.js';
 
 export class SpeechSystem {
     constructor(state, engine, particles) {
-        // Explicit this binding
         this.state = state;
         this.engine = engine;
         this.particles = particles;
         this.isRecogRunning = false;
-        this.shouldListen = false; // Source of truth for intended state
+        this.shouldListen = false; // Source of truth
 
         const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRec) {
@@ -23,17 +22,18 @@ export class SpeechSystem {
             this.recog.interimResults = true;
             this.synth = window.speechSynthesis;
 
-            // Arrow functions to preserve 'this'
+            // Events
             this.recog.onstart = () => {
                 this.isRecogRunning = true;
                 logDebug("Speech Rec: Started actively listening.");
+                const el = document.getElementById('ai-speech-text');
+                if (el) el.innerText = ">> تم تفعيل الميكروفون... أستمع لك <<";
             };
 
             this.recog.onerror = (e) => {
                 this.isRecogRunning = false;
                 logError(`Speech Rec Error: [${e.error}] - ${e.message || ''}`);
-
-                // If not allowed, stop trying
+                // Stop trying if browser denied permission
                 if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
                     this.shouldListen = false;
                 }
@@ -43,14 +43,18 @@ export class SpeechSystem {
                 this.isRecogRunning = false;
                 logDebug("Speech Rec: Connection ended.");
 
-                // Auto-Restart logic if it is supposed to be active (and mic is ON)
+                // Intelligent Auto-Restart with safety delay
                 if (this.shouldListen && this.state.audioActive) {
-                    try {
-                        logDebug("Speech Rec: Attempting Auto-restart...");
-                        this.recog.start();
-                    } catch (err) {
-                        logError("Speech Auto-Restart System Blocked: " + err);
-                    }
+                    setTimeout(() => {
+                        if (this.shouldListen && !this.isRecogRunning) {
+                            try {
+                                logDebug("Speech Rec: Attempting Auto-restart...");
+                                this.recog.start();
+                            } catch (err) {
+                                logError("Speech Auto-Restart System Blocked: " + err);
+                            }
+                        }
+                    }, 400); // Prevents infinite loop freezing
                 }
             };
 
@@ -61,19 +65,17 @@ export class SpeechSystem {
                 }
 
                 const el = document.getElementById('ai-speech-text');
-                if (el && text) {
-                    el.innerText = text;
-                }
+                if (el && text) el.innerText = text;
 
                 this.state.speechSync = 1.0;
 
-                // Trigger command processing only on Final result
+                // Only trigger intent on final phrase
                 if (e.results.length > 0 && e.results[e.results.length - 1].isFinal) {
                     this.onCommand(text);
                 }
             };
 
-            logDebug("SpeechSystem constructed successfully. Awaiting user interaction.");
+            logDebug("SpeechSystem constructed successfully.");
         } catch (e) {
             logError("Speech Setup Critical Failure: " + e);
         }
@@ -81,20 +83,22 @@ export class SpeechSystem {
 
     onCommand(text) {
         logDebug("Detected Final Speech: " + text);
-        // Using arrow function callback to preserve 'this' when passed to parseIntent
         parseIntent(text, this.state, this.engine, this.particles, (txt) => this.speak(txt));
         this.renderTextToParticles(text);
     }
 
     startListening() {
-        if (!this.recog) return;
+        if (!this.recog) {
+            logError("Speech start failed: No recog engine.");
+            return;
+        }
         this.shouldListen = true;
         if (!this.isRecogRunning) {
             try {
                 this.recog.start();
                 logDebug("Speech Rec: Manual Start triggered by UI.");
             } catch (err) {
-                logError("Speech Start Blocked: " + err);
+                logError("Speech Start Blocked: (" + err.name + ") " + err.message);
             }
         }
     }
@@ -155,7 +159,6 @@ export class SpeechSystem {
             const texData = this.particles.textTexture.image.data;
 
             let validPixels = [];
-            // Cache performance improvement
             for (let i = 0; i < imgData.length; i += 4) {
                 if (imgData[i] > 100) validPixels.push({ x: (i / 4) % 1024, y: Math.floor((i / 4) / 1024) });
             }
